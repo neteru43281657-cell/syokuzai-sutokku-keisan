@@ -8,7 +8,7 @@
     :root {
       --bg: #f5f8fa; 
       --card: #ffffff; 
-      --main: #007bff; /* 明るい青に変更 */
+      --main: #007bff; 
       --main-soft: #eaf4ff; 
       --text: #2c3e50; 
       --muted: #5d6d7e; 
@@ -23,26 +23,25 @@
       color: var(--text); 
       line-height: 1.5; 
       -webkit-font-smoothing: antialiased;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
     }
     
     header { 
       padding: 14px 20px; 
-      background: var(--main); /* グラデーションを廃止し単色に */
+      background: var(--main);
       color: #fff; 
       position: sticky; 
       top: 0; 
       z-index: 10; 
       display: flex; 
-      justify-content: center; /* タイトルを中央に（任意） */
+      justify-content: space-between; /* 左右に振り分け */
       align-items: center;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     .title-text { font-weight: 800; letter-spacing: 0.03em; font-size: 18px; }
+    /* バナー内右側のバージョン表記 */
+    .ver-text { font-size: 11px; font-weight: 400; opacity: 0.8; margin-top: 4px; }
 
-    main { max-width: 980px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; flex: 1; width: 100%; }
+    main { max-width: 980px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
     
     .card { 
       background: var(--card); 
@@ -94,7 +93,6 @@
     
     .badge { font-size: 12px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--text); background: #f8fafc; font-weight: 700; }
     
-    /* 食数バッジを青系統に変更 */
     #summaryBadge {
       background: var(--main-soft);
       color: var(--main);
@@ -102,7 +100,6 @@
     }
 
     .total-badge { background: var(--main); color: #fff; border: none; padding: 4px 16px; }
-
     .divider { height: 1px; background: var(--line); margin: 16px 0; }
 
     .tile { 
@@ -138,10 +135,17 @@
       position: relative;
     }
     
+    /* 削除ボタンの正円修正 */
     .removeBtn { 
-      position: absolute; top: -8px; right: -8px; border: 1px solid var(--line); background: #fff; color: var(--danger); 
-      font-size: 14px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+      position: absolute; top: -8px; right: -8px; 
+      border: 1px solid var(--line); background: #fff; color: var(--danger); 
+      font-size: 16px; 
+      width: 26px; height: 26px; /* 幅と高さを等しく */
+      padding: 0;
+      border-radius: 50%; 
+      display: flex; align-items: center; justify-content: center; 
       font-weight: bold; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      line-height: 0;
     }
     
     .recipeCol-cat { width: 95px; }
@@ -150,9 +154,6 @@
 
     .preview { font-size: 12px; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; width: 100%; }
     .preview span { display: flex; align-items: center; background: var(--main-soft); color: var(--main); padding: 3px 8px; border-radius: 8px; font-weight: 700; border: 1px solid #d0e7ff; }
-
-    /* バージョン表記用 */
-    .footer-ver { text-align: right; font-size: 11px; color: var(--muted); padding: 8px 0; opacity: 0.7; }
 
     @media (max-width: 480px) { 
       .grid5 { grid-template-columns: repeat(4, 1fr); gap: 6px; }
@@ -165,6 +166,7 @@
 
 <header>
   <span class="title-text">食材ストック計算</span>
+  <span class="ver-text">ver 1.0.1</span>
 </header>
 
 <main>
@@ -200,8 +202,6 @@
     <div class="divider" style="background: var(--main); opacity: 0.1;"></div>
     <div id="resultGrid" class="grid5"></div>
   </section>
-
-  <div class="footer-ver">ver 1.0.1</div>
 </main>
 
 <script>

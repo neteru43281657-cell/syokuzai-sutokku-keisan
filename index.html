@@ -23,6 +23,7 @@
     button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-weight: 800; cursor: pointer; font-size: 13px; }
     button.primary { background: #111; color: #fff; }
     button.danger { color: var(--danger); border-color: #f0c2c7; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
     
     .badge { font-size: 11px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: #fff; }
     .divider { height: 1px; background: var(--line); margin: 8px 0; }
@@ -31,7 +32,6 @@
     .icon { width: 32px; height: 32px; object-fit: contain; }
     .tileName { font-size: 10px; font-weight: 800; height: 2.4em; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
     
-    /* 修正箇所：チェックボックスと文字を中央で揃える */
     .chkLabel { 
       display: flex; 
       align-items: center; 
@@ -48,7 +48,8 @@
     .repQty { padding: 2px 4px; font-size: 12px; text-align: center; }
     .suffix { font-size: 10px; color: var(--muted); }
 
-    .recipeRow { border: 1px dashed var(--line); border-radius: 12px; padding: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 8px; }
+    .recipeRow { border: 1px dashed var(--line); border-radius: 12px; padding: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 8px; position: relative; }
+    .removeBtn { position: absolute; top: 5px; right: 5px; border: none; background: none; color: var(--danger); font-size: 16px; cursor: pointer; padding: 0 5px; }
     .preview { font-size: 11px; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; border-top: 1px solid #f0f1f5; padding-top: 6px; }
     .preview span { display: flex; align-items: center; background: #f0f1f5; padding: 2px 6px; border-radius: 6px; }
 
@@ -98,6 +99,9 @@
 
 <script>
 const MEALS_PER_DAY = 3;
+const MAX_RECIPE_ROWS = 9;
+const MAX_TOTAL_MEALS = 21;
+
 const INGREDIENTS = [
   { id:"leek", name:"ふといながねぎ", file:"ふといながねぎ.webp" },
   { id:"mushroom", name:"あじわいキノコ", file:"あじわいキノコ.webp" },
@@ -194,7 +198,7 @@ const RECIPES = [
   { cat:"デザート", id:"veg_juice", name:"マイペースやさいジュース", ingredients: { tomato:9, apple:7 } },
   { cat:"デザート", id:"ginger_tea", name:"ひのこのジンジャーティー", ingredients: { ginger:9, apple:7 } },
   { cat:"デザート", id:"sweet_potato", name:"じゅくせいスイートポテト", ingredients: { potato:9, milk:5 } },
-  { cat:"デザート", id:"apple_pie", name:"ね願いごとアップルパイ", ingredients: { apple:12, milk:4 } }
+  { cat:"デザート", id:"apple_pie", name:"ねがいごとアップルパイ", ingredients: { apple:12, milk:4 } }
 ];
 
 const el = (id) => document.getElementById(id);
@@ -227,16 +231,20 @@ function renderGrids() {
 }
 
 function addRecipeRow(init) {
+  if (state.recipeRows.length >= MAX_RECIPE_ROWS) return;
+
   const rowId = crypto.randomUUID();
   const rowData = { rowId, cat: init?.cat || "カレー", recipeId: init?.recipeId || RECIPES[0].id, meals: init?.meals || 0 };
   state.recipeRows.push(rowData);
 
   const wrap = document.createElement("div");
   wrap.className = "recipeRow";
+  wrap.dataset.rowId = rowId;
   wrap.innerHTML = `
+    <button class="removeBtn">×</button>
     <div style="width:90px;"><label>カテゴリ</label><select class="catSel"><option>カレー</option><option>サラダ</option><option>デザート</option></select></div>
     <div style="flex:1; min-width:120px;"><label>料理</label><select class="recipeSel"></select></div>
-    <div style="width:70px;"><label>食数</label><select class="mealsSel">${[...Array(22).keys()].map(v => `<option value="${v}">${v}</option>`).join("")}</select></div>
+    <div style="width:70px;"><label>食数</label><select class="mealsSel"></select></div>
     <div class="preview" style="width:100%;"></div>`;
 
   const cSel = wrap.querySelector(".catSel"), rSel = wrap.querySelector(".recipeSel"), mSel = wrap.querySelector(".mealsSel"), pre = wrap.querySelector(".preview");
@@ -254,18 +262,52 @@ function addRecipeRow(init) {
     if (r) {
       pre.innerHTML = Object.entries(r.ingredients).map(([id, q]) => `<span><img src="${imgSrc(getIng(id).file)}" style="width:14px; margin-right:4px;">${q}</span>`).join("");
     }
+    updateAllMealDropdowns();
     calc();
   };
 
   cSel.onchange = updateRecipeList;
   rSel.onchange = updatePreview;
   mSel.onchange = updatePreview;
+  wrap.querySelector(".removeBtn").onclick = () => {
+    state.recipeRows = state.recipeRows.filter(r => r.rowId !== rowId);
+    wrap.remove();
+    updateAllMealDropdowns();
+    checkAddButton();
+    calc();
+  };
 
   cSel.value = rowData.cat;
   updateRecipeList();
-  mSel.value = rowData.meals;
   
   el("recipeList").appendChild(wrap);
+  updateAllMealDropdowns();
+  checkAddButton();
+}
+
+function updateAllMealDropdowns() {
+  const currentTotal = state.recipeRows.reduce((sum, r) => sum + r.meals, 0);
+  
+  state.recipeRows.forEach(row => {
+    const wrap = document.querySelector(`.recipeRow[data-row-id="${row.rowId}"]`);
+    const mSel = wrap.querySelector(".mealsSel");
+    const otherMeals = currentTotal - row.meals;
+    const maxAvailable = MAX_TOTAL_MEALS - otherMeals;
+    
+    const prevVal = mSel.value || row.meals;
+    mSel.innerHTML = "";
+    for (let i = 0; i <= maxAvailable; i++) {
+      const opt = document.createElement("option");
+      opt.value = i; opt.textContent = i;
+      mSel.appendChild(opt);
+    }
+    mSel.value = Math.min(prevVal, maxAvailable);
+    row.meals = Number(mSel.value);
+  });
+}
+
+function checkAddButton() {
+  el("addRecipe").disabled = state.recipeRows.length >= MAX_RECIPE_ROWS;
 }
 
 function calc() {
@@ -273,16 +315,23 @@ function calc() {
   const replenishMap = new Map([...document.querySelectorAll(".repQty")].map(c => [c.dataset.iid, Number(c.value) || 0]));
 
   const totalMeals = state.recipeRows.reduce((sum, r) => sum + r.meals, 0);
-  const days = totalMeals / MEALS_PER_DAY;
-  el("summaryBadge").textContent = `合計 ${totalMeals}食（${days.toFixed(1)}日換算）`;
+  const totalDays = totalMeals / MEALS_PER_DAY;
+  el("summaryBadge").textContent = `合計 ${totalMeals}食（${totalDays.toFixed(1)}日換算）`;
 
-  const need = new Map();
+  // 食材ごとの正味必要数を計算（各レシピの食数に応じた個別の日数減算を適用）
+  const netNeed = new Map();
   state.recipeRows.forEach(row => {
     if (row.meals <= 0) return;
     const r = RECIPES.find(x => x.id === row.recipeId);
     if (!r) return;
-    Object.entries(r.ingredients).forEach(([id, q]) => {
-      need.set(id, (need.get(id) || 0) + (q * row.meals));
+    
+    const rowDays = row.meals / MEALS_PER_DAY; // 各行ごとの換算日数
+    
+    Object.entries(r.ingredients).forEach(([iid, qtyPerMeal]) => {
+      const gross = qtyPerMeal * row.meals;
+      const rowReplenish = (replenishMap.get(iid) || 0) * rowDays;
+      const currentNet = netNeed.get(iid) || 0;
+      netNeed.set(iid, currentNet + (gross - rowReplenish));
     });
   });
 
@@ -290,15 +339,12 @@ function calc() {
   resultGrid.innerHTML = "";
   let grandTotal = 0;
 
-  // 修正箇所：追加されているレシピの順番で表示
   const recipeOrder = [...new Set(state.recipeRows.filter(r => r.meals > 0).map(r => r.recipeId))];
   const ingredientOrder = [];
   recipeOrder.forEach(rid => {
     const r = RECIPES.find(x => x.id === rid);
     Object.keys(r.ingredients).forEach(iid => {
-      if (!ingredientOrder.includes(iid)) {
-        ingredientOrder.push(iid);
-      }
+      if (!ingredientOrder.includes(iid)) ingredientOrder.push(iid);
     });
   });
 
@@ -306,11 +352,8 @@ function calc() {
     const ing = getIng(iid);
     if (!ing || exclude.has(iid)) return;
 
-    const baseNeed = need.get(iid) || 0;
-    if (baseNeed <= 0) return;
-
-    const dailyRep = replenishMap.get(iid) || 0;
-    const finalNeed = Math.max(0, Math.round(baseNeed - (dailyRep * days)));
+    // 小数点切り上げで最終個数を算出（負数は0）
+    const finalNeed = Math.max(0, Math.ceil(netNeed.get(iid) || 0));
 
     if (finalNeed > 0) {
       grandTotal += finalNeed;
@@ -327,7 +370,12 @@ function calc() {
 }
 
 el("addRecipe").onclick = () => addRecipeRow({meals: 0});
-el("clearAll").onclick = () => { el("recipeList").innerHTML = ""; state.recipeRows = []; calc(); };
+el("clearAll").onclick = () => { 
+  el("recipeList").innerHTML = ""; 
+  state.recipeRows = []; 
+  checkAddButton();
+  calc(); 
+};
 
 renderGrids();
 addRecipeRow({ cat: "カレー", recipeId: "avocado_gratin", meals: 0 });

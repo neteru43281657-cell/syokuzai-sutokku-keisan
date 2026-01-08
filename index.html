@@ -11,7 +11,6 @@
       --main: #007aff; 
       --main-soft: #e5f1ff;
       --text: #111111; /* 文字は基本黒 */
-      --muted: #111111; /* ラベル等も黒に */
       --line: #dbe3ec; 
       --danger: #e74c3c;
     }
@@ -58,9 +57,17 @@
     button.primary { background: var(--main); color: #fff; border-color: var(--main); }
     button.danger { color: var(--danger); border-color: #fadbd8; background: #fdf2f2; }
     
-    /* 食数バッジ等は背景を薄くし文字は黒 */
-    .badge { font-size: 11px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--text); background: #f0f3f5; font-weight: 800; }
-    /* 「総合計~~個」のバッジのみ青背景白文字 */
+    /* 赤枠指定箇所：合計食数バッジを青枠・薄青背景に変更 */
+    .badge { 
+      font-size: 11px; 
+      padding: 4px 10px; 
+      border-radius: 999px; 
+      border: 1px solid var(--main); 
+      color: var(--text); 
+      background: var(--main-soft); 
+      font-weight: 800; 
+    }
+    /* 「総合計~~個」のバッジのみ青背景白文字を維持 */
     .total-badge { background: var(--main); color: #fff; font-weight: 800; border: none; }
 
     .divider { height: 1px; background: var(--line); margin: 12px 0; }
@@ -109,6 +116,7 @@
       position: relative; 
     }
     
+    /* 削除ボタンの楕円化防止 */
     .removeBtn { 
       position: absolute; top: 6px; right: 6px; border: none; background: #eee; color: var(--danger); 
       font-size: 12px; width: 18px; height: 18px; min-width: 18px; min-height: 18px; flex-shrink: 0;
@@ -120,8 +128,18 @@
     .recipeCol-main { flex: 1; min-width: 130px; }
     .recipeCol-meals { width: 60px; }
 
+    /* 赤枠指定箇所：レシピ内の食材プレビューを青枠・薄青背景に変更 */
     .preview { font-size: 11px; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; width: 100%; }
-    .preview span { display: flex; align-items: center; background: #f0f3f5; color: var(--text); padding: 2px 6px; border-radius: 6px; font-weight: 800; border: 1px solid var(--line); }
+    .preview span { 
+      display: flex; 
+      align-items: center; 
+      background: var(--main-soft); 
+      color: var(--text); 
+      padding: 2px 6px; 
+      border-radius: 6px; 
+      font-weight: 800; 
+      border: 1px solid var(--main); 
+    }
 
     @media (max-width: 400px) { 
       .grid5 { gap: 3px; } 

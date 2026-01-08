@@ -6,91 +6,145 @@
   <title>食材ストック計算</title>
   <style>
     :root {
-      --bg: #f6f7fb; --card: #fff; --text: #111; --muted: #666; --line: #e6e8f0; --danger: #b00020;
+      /* ブルー＆ホワイトの爽やかなパレット */
+      --bg: #f0f4f8; 
+      --card: #ffffff; 
+      --main: #007aff; 
+      --main-soft: #e5f1ff;
+      --text: #2c3e50; 
+      --muted: #7f8c8d; 
+      --line: #dbe3ec; 
+      --danger: #e74c3c;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.4; }
+    body { margin: 0; font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; background: var(--bg); color: var(--text); line-height: 1.4; }
     
     header { 
-      padding: 12px 14px; 
-      background: #111; 
+      padding: 14px 18px; 
+      background: var(--main); 
       color: #fff; 
       position: sticky; 
       top: 0; 
       z-index: 10; 
       display: flex; 
       justify-content: space-between; 
-      align-items: center; 
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,122,255,0.2);
     }
-    .ver-text { font-size: 10px; font-weight: normal; opacity: 0.7; }
-    .title-text { font-weight: 800; }
+    .ver-text { font-size: 10px; font-weight: normal; opacity: 0.9; }
+    .title-text { font-weight: 800; letter-spacing: 0.05em; }
 
-    main { max-width: 980px; margin: 0 auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+    main { max-width: 980px; margin: 0 auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
     
-    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
     .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     
-    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    /* 1行5個表示のグリッド */
+    .grid5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
     
-    label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px; }
-    select, input[type="number"] { padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; width: 100%; background: #fff; appearance: none; }
-    button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-weight: 800; cursor: pointer; font-size: 13px; }
-    button.primary { background: #111; color: #fff; }
-    button.danger { color: var(--danger); border-color: #f0c2c7; }
+    label { font-size: 10px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 3px; }
+    select, input[type="number"] { 
+      padding: 8px; 
+      border: 1px solid var(--line); 
+      border-radius: 10px; 
+      font-size: 14px; 
+      width: 100%; 
+      background: #fff; 
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+    select:focus, input:focus { outline: none; border-color: var(--main); }
+
+    button { padding: 8px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-weight: 800; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+    button.primary { background: var(--main); color: #fff; border-color: var(--main); }
+    button.primary:active { opacity: 0.8; }
+    button.danger { color: var(--danger); border-color: #fadbd8; background: #fdf2f2; }
     button:disabled { opacity: 0.3; cursor: not-allowed; }
     
-    .badge { font-size: 11px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: #fff; }
+    .badge { font-size: 11px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--main-soft); color: var(--main); background: var(--main-soft); font-weight: 700; }
     .divider { height: 1px; background: var(--line); margin: 12px 0; }
 
-    .tile { border: 1px solid var(--line); border-radius: 10px; padding: 8px 4px; display: flex; flex-direction: column; gap: 4px; background: #fff; align-items: center; text-align: center; min-height: 105px; justify-content: space-between; }
-    .icon { width: 32px; height: 32px; object-fit: contain; } /* 背景を削除 */
-    .tileName { font-size: 10px; font-weight: 800; height: 2.8em; display: flex; align-items: center; justify-content: center; line-height: 1.1; overflow: hidden; }
+    /* 食材タイル（1行5個用調整） */
+    .tile { 
+      border: 1px solid var(--line); 
+      border-radius: 12px; 
+      padding: 6px 2px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 4px; 
+      background: #fff; 
+      align-items: center; 
+      text-align: center; 
+      min-height: 90px; 
+      justify-content: space-between; 
+    }
+    .icon { width: 28px; height: 28px; object-fit: contain; }
     
-    .chkLabel { display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 11px; color: var(--muted); cursor: pointer; width: 100%; }
-    .repInputRow { display: flex; align-items: center; justify-content: center; gap: 2px; width: 100%; }
-    .repQty { padding: 4px; font-size: 12px; text-align: center; border-radius: 6px; }
-    .suffix { font-size: 10px; color: var(--muted); }
+    /* 食材名：1行に収めるための調整 */
+    .tileName { 
+      font-size: 9px; 
+      font-weight: 700; 
+      width: 100%;
+      padding: 0 2px;
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+      color: var(--text);
+    }
+    
+    .chkLabel { display: flex; align-items: center; justify-content: center; gap: 2px; font-size: 9px; color: var(--muted); cursor: pointer; width: 100%; }
+    .repInputRow { display: flex; align-items: center; justify-content: center; gap: 1px; width: 100%; }
+    .repQty { padding: 2px; font-size: 11px; text-align: center; border-radius: 6px; border: 1px solid var(--line); }
+    .suffix { font-size: 9px; color: var(--muted); }
 
-    .recipeRow { border: 1px dashed var(--line); border-radius: 12px; padding: 12px; display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 12px; position: relative; }
+    .recipeRow { 
+      border: 1px solid var(--main-soft); 
+      background: #fcfdfe;
+      border-radius: 14px; 
+      padding: 14px; 
+      display: flex; 
+      gap: 10px; 
+      flex-wrap: wrap; 
+      align-items: flex-end; 
+      margin-bottom: 12px; 
+      position: relative; 
+    }
     
-    /* 削除ボタンの微調整 */
     .removeBtn { 
       position: absolute; 
-      top: 4px; 
-      right: 4px; 
+      top: 6px; 
+      right: 6px; 
       border: none; 
-      background: #eee; 
+      background: #f0f3f5; 
       color: var(--danger); 
       font-size: 12px; 
       cursor: pointer; 
-      /* サイズを固定し、伸縮を禁止する */
       width: 18px; 
       height: 18px; 
-      min-width: 18px; /* 追加：楕円化防止 */
-      min-height: 18px; /* 追加：楕円化防止 */
-      flex-shrink: 0;   /* 追加：レイアウトによる圧縮を防止 */
-      
+      min-width: 18px;
+      min-height: 18px;
+      flex-shrink: 0;
       border-radius: 50%; 
       display: flex; 
       align-items: center; 
       justify-content: center; 
       font-weight: bold; 
       z-index: 2; 
-      padding: 0; /* 追加：余計な余白をリセット */
-      line-height: 1; /* 追加：バツ印の縦位置調整 */
+      padding: 0;
+      line-height: 1;
     }
     
     .recipeCol-cat { width: 85px; }
-    .recipeCol-main { flex: 1; min-width: 140px; }
-    .recipeCol-meals { width: 65px; }
+    .recipeCol-main { flex: 1; min-width: 130px; }
+    .recipeCol-meals { width: 60px; }
 
-    .preview { font-size: 11px; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; border-top: 1px solid #f0f1f5; padding-top: 8px; width: 100%; }
-    .preview span { display: flex; align-items: center; background: #f0f1f5; padding: 2px 8px; border-radius: 6px; font-weight: 600; }
+    .preview { font-size: 11px; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; width: 100%; }
+    .preview span { display: flex; align-items: center; background: var(--main-soft); color: var(--main); padding: 2px 6px; border-radius: 6px; font-weight: 700; }
 
-    @media (max-width: 380px) { 
-      .grid4 { gap: 4px; } 
-      .tile { padding: 4px 2px; min-height: 95px; }
-      .tileName { font-size: 9px; }
+    @media (max-width: 400px) { 
+      .grid5 { gap: 4px; } 
+      .tile { min-height: 80px; }
+      .tileName { font-size: 8px; }
     }
   </style>
 </head>
@@ -105,9 +159,9 @@
   <section class="card">
     <div class="row" style="justify-content: space-between; align-items: flex-start;">
       <div>
-        <div style="font-weight:900; font-size:14px;">条件設定</div>
+        <div style="font-weight:900; font-size:14px; color:var(--main);">条件設定</div>
         <div class="row" style="margin-top:4px;">
-          <span class="badge" id="summaryBadge">合計 0食</span>
+          <span class="badge" id="summaryBadge">合計 0食 / 21食</span>
         </div>
       </div>
       <div class="row">
@@ -115,26 +169,26 @@
         <button id="clearAll" class="danger">クリア</button>
       </div>
     </div>
-    <div id="recipeList" style="margin-top:8px;"></div>
+    <div id="recipeList" style="margin-top:10px;"></div>
   </section>
 
   <section class="card">
-    <div style="font-weight:900; font-size:13px; margin-bottom:8px;">計算から除外（持っている食材など）</div>
-    <div id="excludeGrid" class="grid4"></div>
+    <div style="font-weight:900; font-size:13px; margin-bottom:10px; border-left: 3px solid var(--main); padding-left: 8px;">計算から除外</div>
+    <div id="excludeGrid" class="grid5"></div>
   </section>
 
   <section class="card">
-    <div style="font-weight:900; font-size:13px; margin-bottom:8px;">1日当たりの獲得量（バッグ増加分）</div>
-    <div id="replenishGrid" class="grid4"></div>
+    <div style="font-weight:900; font-size:13px; margin-bottom:10px; border-left: 3px solid var(--main); padding-left: 8px;">1日当たりの獲得量</div>
+    <div id="replenishGrid" class="grid5"></div>
   </section>
 
-  <section class="card">
+  <section class="card" style="border-top: 4px solid var(--main);">
     <div class="row" style="justify-content: space-between;">
-      <div style="font-weight:900; font-size:14px;">必要合計数</div>
-      <span class="badge" id="totalBadge" style="color:#111; font-weight:800; border-color:#111;">総合計 0個</span>
+      <div style="font-weight:900; font-size:14px; color:var(--main);">必要合計数</div>
+      <span class="badge" id="totalBadge" style="background: var(--main); color: #fff;">総合計 0個</span>
     </div>
     <div class="divider"></div>
-    <div id="resultGrid" class="grid4"></div>
+    <div id="resultGrid" class="grid5"></div>
   </section>
 </main>
 
@@ -247,13 +301,13 @@ function renderGrids() {
   INGREDIENTS.forEach(ing => {
     ex.innerHTML += `
       <div class="tile">
-        <div class="tileName">${ing.name}</div>
+        <div class="tileName" title="${ing.name}">${ing.name}</div>
         <img class="icon" src="${imgSrc(ing.file)}" alt="">
         <label class="chkLabel"><input type="checkbox" class="exChk" data-iid="${ing.id}">除外</label>
       </div>`;
     rep.innerHTML += `
       <div class="tile">
-        <div class="tileName">${ing.name}</div>
+        <div class="tileName" title="${ing.name}">${ing.name}</div>
         <img class="icon" src="${imgSrc(ing.file)}" alt="">
         <div class="repInputRow">
           <input type="number" class="repQty" data-iid="${ing.id}" placeholder="0">
@@ -395,9 +449,9 @@ function calc() {
       grandTotal += finalNeed;
       resultGrid.innerHTML += `
         <div class="tile">
-          <div class="tileName">${ing.name}</div>
+          <div class="tileName" title="${ing.name}">${ing.name}</div>
           <img class="icon" src="${imgSrc(ing.file)}" alt="">
-          <div class="resultQty" style="font-weight:900; color:#111;">${finalNeed}<span class="suffix">個</span></div>
+          <div class="resultQty" style="font-weight:900; color:var(--main); font-size: 13px;">${finalNeed}<span class="suffix">個</span></div>
         </div>`;
     }
   });

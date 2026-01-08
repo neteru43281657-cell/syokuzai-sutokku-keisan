@@ -1,0 +1,8 @@
+{
+  "name": "来週の食材ストック計算",
+  "short_name": "食材ストック計算",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#111111"
+}

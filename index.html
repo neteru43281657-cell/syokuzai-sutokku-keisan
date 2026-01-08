@@ -279,15 +279,29 @@ function calc() {
   resultGrid.innerHTML = "";
   let grandTotal = 0;
 
-  // INGREDIENTSの定義順で表示
-  INGREDIENTS.forEach(ing => {
-    if (exclude.has(ing.id)) return;
+// 追加されているレシピのIDを、重複を排除して順番通りに取得
+  const recipeOrder = [...new Set(state.recipeRows.filter(r => r.meals > 0).map(r => r.recipeId))];
+  
+  // そのレシピに含まれる食材IDを順番に抽出
+  const ingredientOrder = [];
+  recipeOrder.forEach(rid => {
+    const r = RECIPES.find(x => x.id === rid);
+    Object.keys(r.ingredients).forEach(iid => {
+      if (!ingredientOrder.includes(iid)) {
+        ingredientOrder.push(iid);
+      }
+    });
+  });
 
-    const baseNeed = need.get(ing.id) || 0;
+  // 抽出した食材順（レシピでの登場順）で表示
+  ingredientOrder.forEach(iid => {
+    const ing = getIng(iid);
+    if (!ing || exclude.has(iid)) return;
+
+    const baseNeed = need.get(iid) || 0;
     if (baseNeed <= 0) return;
 
-    // 減算処理: 必要数 - (1日あたりの補完量 * 日数)
-    const dailyRep = replenishMap.get(ing.id) || 0;
+    const dailyRep = replenishMap.get(iid) || 0;
     const finalNeed = Math.max(0, Math.round(baseNeed - (dailyRep * days)));
 
     if (finalNeed > 0) {

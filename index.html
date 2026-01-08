@@ -6,20 +6,28 @@
   <title>食材ストック計算</title>
   <style>
     :root {
-      --bg: #f0f4f8; 
+      --bg: #f5f8fa; 
       --card: #ffffff; 
-      --main: #007aff; 
-      --main-soft: #e5f1ff;
-      --text: #111111; /* 文字は基本黒 */
-      --line: #dbe3ec; 
+      --main: #0066cc; /* 少し落ち着いた青 */
+      --main-soft: #eaf4ff; /* 非常に淡い水色 */
+      --text: #2c3e50; /* 読みやすい濃いグレー */
+      --muted: #5d6d7e; 
+      --line: #d6e0ea; 
       --danger: #e74c3c;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; background: var(--bg); color: var(--text); line-height: 1.4; }
+    body { 
+      margin: 0; 
+      font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      line-height: 1.5; 
+      -webkit-font-smoothing: antialiased;
+    }
     
     header { 
-      padding: 12px 18px; 
-      background: var(--main); 
+      padding: 14px 20px; 
+      background: linear-gradient(135deg, #0052cc 0%, #007aff 100%); /* グラデーションで質感を向上 */
       color: #fff; 
       position: sticky; 
       top: 0; 
@@ -27,124 +35,130 @@
       display: flex; 
       justify-content: space-between; 
       align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    .ver-text { font-size: 10px; font-weight: normal; opacity: 0.9; color: #fff; }
-    .title-text { font-weight: 800; letter-spacing: 0.05em; color: #fff; }
+    .ver-text { font-size: 11px; font-weight: 400; opacity: 0.8; }
+    .title-text { font-weight: 800; letter-spacing: 0.03em; font-size: 18px; }
 
-    main { max-width: 980px; margin: 0 auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+    main { max-width: 980px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
     
-    .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    .card { 
+      background: var(--card); 
+      border: 1px solid var(--line); 
+      border-radius: 16px; 
+      padding: 16px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02); 
+    }
     
-    /* 必要合計数セクション：全体を青色で囲む */
-    .result-card { border: 2.5px solid var(--main); background: #fff; border-radius: 16px; padding: 14px; box-shadow: 0 4px 15px rgba(0,122,255,0.1); }
+    /* 必要合計数セクション */
+    .result-card { 
+      border: 2px solid var(--main); 
+      background: #ffffff; 
+      border-radius: 16px; 
+      padding: 16px; 
+      box-shadow: 0 4px 20px rgba(0,102,204,0.1); 
+    }
 
-    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .grid5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .grid5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
     
-    label { font-size: 10px; font-weight: 800; color: var(--text); display: block; margin-bottom: 3px; }
+    label { font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px; }
+    
     select, input[type="number"] { 
-      padding: 8px; 
+      padding: 10px; 
       border: 1px solid var(--line); 
       border-radius: 10px; 
       font-size: 14px; 
       width: 100%; 
       background: #fff; 
       color: var(--text);
-      font-weight: 500;
+      transition: border-color 0.2s;
     }
+    select:focus, input:focus { outline: none; border-color: var(--main); }
 
-    button { padding: 8px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-weight: 800; cursor: pointer; font-size: 13px; color: var(--text); }
-    button.primary { background: var(--main); color: #fff; border-color: var(--main); }
-    button.danger { color: var(--danger); border-color: #fadbd8; background: #fdf2f2; }
-    
-    /* 赤枠指定箇所：合計食数バッジを青枠・薄青背景に変更 */
-    .badge { 
-      font-size: 11px; 
-      padding: 4px 10px; 
-      border-radius: 999px; 
-      border: 1px solid var(--main); 
-      color: var(--text); 
-      background: var(--main-soft); 
+    button { 
+      padding: 10px 16px; 
+      border: 1px solid var(--line); 
+      border-radius: 10px; 
+      background: #fff; 
       font-weight: 800; 
+      cursor: pointer; 
+      font-size: 14px; 
+      color: var(--text);
+      transition: all 0.2s;
     }
-    /* 「総合計~~個」のバッジのみ青背景白文字を維持 */
-    .total-badge { background: var(--main); color: #fff; font-weight: 800; border: none; }
+    button.primary { background: var(--main); color: #fff; border-color: var(--main); }
+    button.primary:active { transform: scale(0.98); }
+    button.danger { color: var(--danger); border-color: #fadbd8; background: #fff; }
+    button.danger:hover { background: #fdf2f2; }
+    
+    .badge { font-size: 12px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--text); background: #f8fafc; font-weight: 700; }
+    .total-badge { background: var(--main); color: #fff; border: none; padding: 4px 16px; }
 
-    .divider { height: 1px; background: var(--line); margin: 12px 0; }
+    .divider { height: 1px; background: var(--line); margin: 16px 0; }
 
     .tile { 
       border: 1px solid var(--line); 
-      border-radius: 12px; 
-      padding: 6px 2px; 
+      border-radius: 14px; 
+      padding: 8px 4px; 
       display: flex; 
       flex-direction: column; 
-      gap: 4px; 
+      gap: 6px; 
       background: #fff; 
       align-items: center; 
       text-align: center; 
-      min-height: 90px; 
-      justify-content: space-between; 
+      min-height: 100px; 
+      justify-content: space-between;
+      transition: transform 0.1s;
     }
-    .icon { width: 28px; height: 28px; object-fit: contain; }
+    .icon { width: 32px; height: 32px; object-fit: contain; }
     
     .tileName { 
-      font-size: 9px; 
-      font-weight: 800; 
+      font-size: 10px; 
+      font-weight: 700; 
       width: 100%;
-      padding: 0 2px;
+      padding: 0 4px;
       white-space: nowrap; 
       overflow: hidden; 
       text-overflow: ellipsis; 
       color: var(--text);
     }
     
-    .chkLabel { display: flex; align-items: center; justify-content: center; gap: 2px; font-size: 9px; color: var(--text); cursor: pointer; width: 100%; font-weight: 600; }
-    .repInputRow { display: flex; align-items: center; justify-content: center; gap: 1px; width: 100%; }
-    .repQty { padding: 2px; font-size: 11px; text-align: center; border-radius: 6px; border: 1px solid var(--line); font-weight: 800; color: var(--text); }
-    .suffix { font-size: 9px; color: var(--text); }
-
+    .chkLabel { display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 10px; color: var(--text); cursor: pointer; width: 100%; font-weight: 600; }
+    .repInputRow { display: flex; align-items: center; justify-content: center; gap: 2px; width: 100%; }
+    .repQty { padding: 4px; font-size: 12px; text-align: center; border-radius: 8px; border: 1px solid var(--line); font-weight: 800; }
+    
     .recipeRow { 
       border: 1px solid var(--line); 
       background: #fcfdfe;
-      border-radius: 14px; 
-      padding: 14px; 
+      border-radius: 16px; 
+      padding: 16px; 
       display: flex; 
-      gap: 10px; 
+      gap: 12px; 
       flex-wrap: wrap; 
       align-items: flex-end; 
       margin-bottom: 12px; 
-      position: relative; 
+      position: relative;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
     }
     
-    /* 削除ボタンの楕円化防止 */
     .removeBtn { 
-      position: absolute; top: 6px; right: 6px; border: none; background: #eee; color: var(--danger); 
-      font-size: 12px; width: 18px; height: 18px; min-width: 18px; min-height: 18px; flex-shrink: 0;
-      border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; 
-      z-index: 2; padding: 0; line-height: 1;
+      position: absolute; top: -8px; right: -8px; border: 1px solid var(--line); background: #fff; color: var(--danger); 
+      font-size: 14px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+      font-weight: bold; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     
-    .recipeCol-cat { width: 85px; }
-    .recipeCol-main { flex: 1; min-width: 130px; }
-    .recipeCol-meals { width: 60px; }
+    .recipeCol-cat { width: 95px; }
+    .recipeCol-main { flex: 1; min-width: 140px; }
+    .recipeCol-meals { width: 70px; }
 
-    /* 赤枠指定箇所：レシピ内の食材プレビューを青枠・薄青背景に変更 */
-    .preview { font-size: 11px; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; width: 100%; }
-    .preview span { 
-      display: flex; 
-      align-items: center; 
-      background: var(--main-soft); 
-      color: var(--text); 
-      padding: 2px 6px; 
-      border-radius: 6px; 
-      font-weight: 800; 
-      border: 1px solid var(--main); 
-    }
+    .preview { font-size: 12px; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; width: 100%; }
+    .preview span { display: flex; align-items: center; background: var(--main-soft); color: var(--main); padding: 3px 8px; border-radius: 8px; font-weight: 700; border: 1px solid #d0e7ff; }
 
-    @media (max-width: 400px) { 
-      .grid5 { gap: 3px; } 
-      .tile { min-height: 85px; }
-      .tileName { font-size: 8px; }
+    @media (max-width: 480px) { 
+      .grid5 { grid-template-columns: repeat(4, 1fr); gap: 6px; } /* スマホは4列に */
+      main { padding: 12px; }
+      .title-text { font-size: 16px; }
     }
   </style>
 </head>
@@ -159,10 +173,8 @@
   <section class="card">
     <div class="row" style="justify-content: space-between; align-items: flex-start;">
       <div>
-        <div style="font-weight:900; font-size:14px; color:var(--text);">条件設定</div>
-        <div class="row" style="margin-top:4px;">
-          <span class="badge" id="summaryBadge">合計 0食 / 21食</span>
-        </div>
+        <div style="font-weight:900; font-size:15px; color:var(--text); margin-bottom: 4px;">条件設定</div>
+        <span class="badge" id="summaryBadge">合計 0食 / 21食</span>
       </div>
       <div class="row">
         <button id="addRecipe" class="primary">+ 追加</button>
@@ -173,27 +185,27 @@
   </section>
 
   <section class="card">
-    <div style="font-weight:900; font-size:13px; margin-bottom:10px; border-left: 4px solid var(--line); padding-left: 8px;">計算から除外</div>
+    <div style="font-weight:900; font-size:14px; margin-bottom:12px; border-left: 5px solid var(--main); padding-left: 10px; color: var(--text);">計算から除外</div>
     <div id="excludeGrid" class="grid5"></div>
   </section>
 
   <section class="card">
-    <div style="font-weight:900; font-size:13px; margin-bottom:10px; border-left: 4px solid var(--line); padding-left: 8px;">1日当たりの獲得量</div>
+    <div style="font-weight:900; font-size:14px; margin-bottom:12px; border-left: 5px solid var(--main); padding-left: 10px; color: var(--text);">1日当たりの獲得量</div>
     <div id="replenishGrid" class="grid5"></div>
   </section>
 
   <section class="result-card">
     <div class="row" style="justify-content: space-between;">
-      <div style="font-weight:900; font-size:15px; color:var(--main);">必要合計数</div>
+      <div style="font-weight:900; font-size:16px; color:var(--main);">必要合計数</div>
       <span class="badge total-badge" id="totalBadge">総合計 0個</span>
     </div>
-    <div class="divider" style="background: var(--main); opacity: 0.3;"></div>
+    <div class="divider" style="background: var(--main); opacity: 0.1;"></div>
     <div id="resultGrid" class="grid5"></div>
   </section>
 </main>
 
 <script>
-/* 以前のロジックをそのまま継承 */
+/* 以下のロジックは全て継承 */
 const MEALS_PER_DAY = 3;
 const MAX_RECIPE_ROWS = 9;
 const MAX_TOTAL_MEALS = 21;
@@ -221,7 +233,6 @@ const INGREDIENTS = [
 ];
 
 const RECIPES = [
-  // カレー
   { cat:"カレー", id:"avocado_gratin", name:"しんりょくアボカドグラタン", ingredients: { avocado:22, potato:20, milk:41, oil:32 } },
   { cat:"カレー", id:"sukiyaki_curry", name:"いあいぎりすき焼きカレー", ingredients: { leek:27, soymeat:26, honey:26, egg:22 } },
   { cat:"カレー", id:"awake_stew", name:"めざめるパワーシチュー", ingredients: { soy:28, tomato:25, mushroom:23, coffee:16 } },
@@ -241,7 +252,6 @@ const RECIPES = [
   { cat:"カレー", id:"tomato_curry", name:"サンパワートマトカレー", ingredients: { tomato:10, herb:5 } },
   { cat:"カレー", id:"cutlet_curry", name:"ひでりカツレツカレー", ingredients: { soymeat:10, oil:5 } },
   { cat:"カレー", id:"cheese_hamburg_curry", name:"満腹チーズバーグカレー", ingredients: { milk:8, soymeat:8 } },
-  // サラダ
   { cat:"サラダ", id:"guacamole_chips", name:"じならしワカモレチップス", ingredients: { avocado:28, corn:25, herb:30, soy:22 } },
   { cat:"サラダ", id:"coffee_salad", name:"まけんきコーヒーサラダ", ingredients: { coffee:28, soymeat:28, oil:22, potato:22 } },
   { cat:"サラダ", id:"apple_yogurt_salad", name:"りんごさんヨーグルトサラダ", ingredients: { egg:35, apple:28, tomato:23, milk:18 } },
@@ -264,7 +274,6 @@ const RECIPES = [
   { cat:"サラダ", id:"apple_cheese_salad", name:"メロメロりんごのチーズサラダ", ingredients: { apple:15, milk:5, oil:3 } },
   { cat:"サラダ", id:"hot_air_tofu_salad", name:"ねっぷうとうふサラダ", ingredients: { soy:10, herb:6 } },
   { cat:"サラダ", id:"caesar_salad", name:"ゆきかきシーザーサラダ", ingredients: { milk:10, soymeat:6 } },
-  // デザート
   { cat:"デザート", id:"pancake", name:"ドキドキこわいかおパンケーキ", ingredients: { pumpkin:18, egg:24, honey:32, tomato:29 } },
   { cat:"デザート", id:"eclair", name:"ドオーのエクレア", ingredients: { cacao:30, milk:26, coffee:24, honey:22 } },
   { cat:"デザート", id:"cola", name:"スパイクスパイスコーラ", ingredients: { apple:35, ginger:20, leek:20, coffee:12 } },

@@ -217,12 +217,20 @@ function renderGrids() {
         <div class="tileName">${ing.name}</div>
         <img class="icon" src="${imgSrc(ing.file)}">
         <div class="repInputRow">
-          <input type="number" class="repQty" data-iid="${ing.id}" placeholder="0">
+          <input type="number" class="repQty" data-iid="${ing.id}" placeholder="0" max="9999">
           <span class="suffix">個</span>
         </div>
       </div>`;
   });
-  document.querySelectorAll(".exChk, .repQty").forEach(input => input.oninput = calc);
+document.querySelectorAll(".exChk, .repQty").forEach(input => {
+  input.oninput = (e) => {
+    // 9999上限チェック
+    if (e.target.classList.contains("repQty") && e.target.value > 9999) {
+      e.target.value = 9999;
+    }
+    calc();
+  };
+});
 }
 
 function addRecipeRow(init) {

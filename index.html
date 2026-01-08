@@ -21,15 +21,16 @@
     button:disabled { opacity: 0.5; }
     .badge { font-size: 11px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: #fff; }
     .divider { height: 1px; background: var(--line); margin: 8px 0; }
-    .tile { border: 1px solid var(--line); border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 4px; background: #fff; align-items: center; text-align: center; position: relative; }
+    .tile { border: 1px solid var(--line); border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 4px; background: #fff; align-items: center; text-align: center; }
     .icon { width: 32px; height: 32px; object-fit: contain; }
     .tileName { font-size: 10px; font-weight: 800; height: 2.4em; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
-    .chkLabel { display: flex; align-items: center; gap: 3px; font-size: 10px; cursor: pointer; color: var(--muted); }
-    .repQty { padding: 2px; font-size: 11px; text-align: center; border: 1px solid var(--line); border-radius: 4px; width: 100%; }
-    .recipeRow { border: 1px dashed var(--line); border-radius: 12px; padding: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 8px; position: relative; background: #fafbfc; }
-    .removeBtn { position: absolute; top: 5px; right: 5px; border: none; background: none; color: var(--danger); font-size: 18px; cursor: pointer; }
-    .preview { font-size: 11px; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; border-top: 1px solid #eee; padding-top: 6px; width: 100%; }
-    .preview span { display: flex; align-items: center; background: #eee; padding: 2px 6px; border-radius: 6px; }
+    .chkLabel { display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 11px; color: var(--muted); cursor: pointer; margin-top: 2px; }
+    .repInputRow { display: flex; align-items: center; gap: 2px; width: 100%; margin-top: 2px; }
+    .repQty { padding: 2px 4px; font-size: 12px; text-align: center; }
+    .recipeRow { border: 1px dashed var(--line); border-radius: 12px; padding: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 8px; position: relative; }
+    .removeBtn { position: absolute; top: 5px; right: 5px; border: none; background: none; color: var(--danger); font-size: 16px; cursor: pointer; padding: 0 5px; }
+    .preview { font-size: 11px; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; border-top: 1px solid #f0f1f5; padding-top: 6px; width: 100%; }
+    .preview span { display: flex; align-items: center; background: #f0f1f5; padding: 2px 6px; border-radius: 6px; }
     @media (max-width: 360px) { .grid4 { gap: 4px; } }
   </style>
 </head>
@@ -40,7 +41,10 @@
 <main>
   <section class="card">
     <div class="row" style="justify-content: space-between;">
-      <div style="font-weight:900; font-size:14px;">条件 <span class="badge" id="summaryBadge">合計 0食</span></div>
+      <div>
+        <div style="font-weight:900; font-size:14px;">条件</div>
+        <div class="row" style="margin-top:4px;"><span class="badge" id="summaryBadge">合計 0食</span></div>
+      </div>
       <div class="row">
         <button id="addRecipe" class="primary">+ 追加</button>
         <button id="clearAll" class="danger">クリア</button>
@@ -50,13 +54,18 @@
   </section>
 
   <section class="card">
-    <div style="font-weight:900; font-size:13px; margin-bottom:8px;">食材設定（除外・補完量）</div>
-    <div id="ingGrid" class="grid4"></div>
+    <div style="font-weight:900; font-size:13px; margin-bottom:8px;">計算から除外</div>
+    <div id="excludeGrid" class="grid4"></div>
+  </section>
+
+  <section class="card">
+    <div style="font-weight:900; font-size:13px; margin-bottom:8px;">1日当たりの補完量</div>
+    <div id="replenishGrid" class="grid4"></div>
   </section>
 
   <section class="card">
     <div class="row" style="justify-content: space-between;">
-      <div style="font-weight:900; font-size:14px;">計算結果（必要数）</div>
+      <div style="font-weight:900; font-size:14px;">計算結果</div>
       <span class="badge" id="totalBadge" style="color:#111; font-weight:800;">総合計 0個</span>
     </div>
     <div class="divider"></div>
@@ -103,26 +112,26 @@ const RECIPES = [
 const el = (id) => document.getElementById(id);
 let state = { recipeRows: [] };
 
-function renderIngGrid() {
-  const grid = el("ingGrid");
-  grid.innerHTML = INGREDIENTS.map(ing => `
+function renderGrids() {
+  const ex = el("excludeGrid"), rep = el("replenishGrid");
+  ex.innerHTML = INGREDIENTS.map(ing => `
     <div class="tile">
       <div class="tileName">${ing.name}</div>
       <img class="icon" src="images/${ing.file}">
       <label class="chkLabel"><input type="checkbox" class="exChk" data-iid="${ing.id}">除外</label>
-      <div style="width:100%"><input type="number" class="repQty" data-iid="${ing.id}" placeholder="補完0"></div>
     </div>`).join("");
-  grid.querySelectorAll("input").forEach(i => i.oninput = calc);
+  rep.innerHTML = INGREDIENTS.map(ing => `
+    <div class="tile">
+      <div class="tileName">${ing.name}</div>
+      <img class="icon" src="images/${ing.file}">
+      <div class="repInputRow"><input type="number" class="repQty" data-iid="${ing.id}" placeholder="0"><span style="font-size:10px;">個</span></div>
+    </div>`).join("");
+  document.querySelectorAll(".exChk, .repQty").forEach(i => i.oninput = calc);
 }
 
-function addRecipeRow(initData = null) {
+function addRecipeRow() {
   const rowId = crypto.randomUUID();
-  const rowData = { 
-    rowId, 
-    cat: initData?.cat || "カレー", 
-    recipeId: initData?.recipeId || RECIPES.find(r => r.cat === "カレー").id, 
-    meals: initData?.meals || 0 
-  };
+  const rowData = { rowId, cat: "カレー", recipeId: RECIPES[0].id, meals: 0 };
   state.recipeRows.push(rowData);
 
   const wrap = document.createElement("div");
@@ -130,21 +139,16 @@ function addRecipeRow(initData = null) {
   wrap.dataset.rowId = rowId;
   wrap.innerHTML = `
     <button class="removeBtn">×</button>
-    <div style="width:85px;"><label>カテゴリ</label><select class="catSel"><option>カレー</option><option>サラダ</option><option>デザート</option></select></div>
+    <div style="width:90px;"><label>カテゴリ</label><select class="catSel"><option>カレー</option><option>サラダ</option><option>デザート</option></select></div>
     <div style="flex:1;"><label>料理</label><select class="recipeSel"></select></div>
-    <div style="width:60px;"><label>食数</label><select class="mealsSel"></select></div>
+    <div style="width:70px;"><label>食数</label><select class="mealsSel"></select></div>
     <div class="preview"></div>`;
 
-  const cSel = wrap.querySelector(".catSel"), rSel = wrap.querySelector(".recipeSel"), mSel = wrap.querySelector(".mealsSel");
+  const cSel = wrap.querySelector(".catSel"), rSel = wrap.querySelector(".recipeSel"), mSel = wrap.querySelector(".mealsSel"), pre = wrap.querySelector(".preview");
 
-  cSel.value = rowData.cat;
-  
   const updateRecipes = () => {
     const filtered = RECIPES.filter(r => r.cat === cSel.value);
     rSel.innerHTML = filtered.map(r => `<option value="${r.id}">${r.name}</option>`).join("");
-    if (initData && filtered.some(r => r.id === rowData.recipeId)) {
-        rSel.value = rowData.recipeId;
-    }
     rowData.recipeId = rSel.value;
     updatePreview();
   };
@@ -152,13 +156,13 @@ function addRecipeRow(initData = null) {
   const updatePreview = () => {
     rowData.cat = cSel.value; rowData.recipeId = rSel.value; rowData.meals = Number(mSel.value);
     const r = RECIPES.find(x => x.id === rSel.value);
-    wrap.querySelector(".preview").innerHTML = r ? Object.entries(r.ingredients).map(([id, q]) => 
-      `<span><img src="images/${INGREDIENTS.find(i=>i.id===id).file}" style="width:12px;margin-right:3px;">${q}</span>`).join("") : "";
+    pre.innerHTML = r ? Object.entries(r.ingredients).map(([id, q]) => 
+      `<span><img src="images/${INGREDIENTS.find(i=>i.id===id).file}" style="width:14px;margin-right:4px;">${q}</span>`).join("") : "";
     updateAllMealOptions();
     calc();
   };
 
-  cSel.onchange = () => { initData = null; updateRecipes(); };
+  cSel.onchange = updateRecipes;
   rSel.onchange = updatePreview;
   mSel.onchange = updatePreview;
   wrap.querySelector(".removeBtn").onclick = () => {
@@ -175,13 +179,14 @@ function addRecipeRow(initData = null) {
 function updateAllMealOptions() {
   const currentTotal = state.recipeRows.reduce((s, r) => s + r.meals, 0);
   state.recipeRows.forEach(row => {
-    const sel = document.querySelector(`[data-row-id="${row.rowId}"] .mealsSel`);
-    if(!sel) return;
+    const rowEl = document.querySelector(`.recipeRow[data-row-id="${row.rowId}"]`);
+    if (!rowEl) return;
+    const mSel = rowEl.querySelector(".mealsSel");
     const maxVal = MAX_TOTAL_MEALS - (currentTotal - row.meals);
-    const prev = sel.value;
-    sel.innerHTML = Array.from({length: maxVal + 1}, (_, i) => `<option value="${i}">${i}</option>`).join("");
-    sel.value = Math.min(prev, maxVal);
-    row.meals = Number(sel.value);
+    const prev = mSel.value;
+    mSel.innerHTML = Array.from({length: maxVal + 1}, (_, i) => `<option value="${i}">${i}</option>`).join("");
+    mSel.value = Math.min(prev, maxVal);
+    row.meals = Number(mSel.value);
   });
 }
 
@@ -191,14 +196,13 @@ function calc() {
   
   const totalMeals = state.recipeRows.reduce((s, r) => s + r.meals, 0);
   const totalDays = totalMeals / MEALS_PER_DAY;
-  el("summaryBadge").textContent = `合計 ${totalMeals}食（${totalDays.toFixed(1)}日分）`;
+  el("summaryBadge").textContent = `合計 ${totalMeals}食（${totalDays.toFixed(1)}日換算）`;
 
   const needs = new Map();
   state.recipeRows.forEach(row => {
     const r = RECIPES.find(x => x.id === row.recipeId);
     if (!r || row.meals <= 0) return;
     Object.entries(r.ingredients).forEach(([id, q]) => {
-      // (1食あたりの個数 * 食数) - (1日あたりの補完量 * その料理の換算日数)
       const net = (q * row.meals) - (reps.get(id) || 0) * (row.meals / MEALS_PER_DAY);
       needs.set(id, (needs.get(id) || 0) + net);
     });
@@ -217,11 +221,11 @@ function calc() {
   el("addRecipe").disabled = state.recipeRows.length >= 9;
 }
 
-el("addRecipe").onclick = () => addRecipeRow();
+el("addRecipe").onclick = addRecipeRow;
 el("clearAll").onclick = () => { el("recipeList").innerHTML = ""; state.recipeRows = []; calc(); };
 
-renderIngGrid();
-addRecipeRow({ cat: "カレー", recipeId: "avocado_gratin", meals: 0 });
+renderGrids();
+addRecipeRow();
 </script>
 </body>
 </html>

@@ -31,6 +31,19 @@
     .icon { width: 32px; height: 32px; object-fit: contain; }
     .tileName { font-size: 10px; font-weight: 800; height: 2.4em; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
     
+    /* 修正箇所：チェックボックスと文字を中央で揃える */
+    .chkLabel { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 4px; 
+      font-size: 11px; 
+      color: var(--muted); 
+      cursor: pointer;
+      margin-top: 2px;
+    }
+    .chkLabel input[type="checkbox"] { margin: 0; cursor: pointer; }
+
     .repInputRow { display: flex; align-items: center; gap: 2px; width: 100%; margin-top: 2px; }
     .repQty { padding: 2px 4px; font-size: 12px; text-align: center; }
     .suffix { font-size: 10px; color: var(--muted); }
@@ -107,7 +120,6 @@ const INGREDIENTS = [
   { id:"avocado", name:"つやつやアボカド", file:"つやつやアボカド.webp" }
 ];
 
-// レシピデータ（全カテゴリ統合）
 const RECIPES = [
   // カレー
   { cat:"カレー", id:"avocado_gratin", name:"しんりょくアボカドグラタン", ingredients: { avocado:22, potato:20, milk:41, oil:32 } },
@@ -182,7 +194,7 @@ const RECIPES = [
   { cat:"デザート", id:"veg_juice", name:"マイペースやさいジュース", ingredients: { tomato:9, apple:7 } },
   { cat:"デザート", id:"ginger_tea", name:"ひのこのジンジャーティー", ingredients: { ginger:9, apple:7 } },
   { cat:"デザート", id:"sweet_potato", name:"じゅくせいスイートポテト", ingredients: { potato:9, milk:5 } },
-  { cat:"デザート", id:"apple_pie", name:"ねがいごとアップルパイ", ingredients: { apple:12, milk:4 } }
+  { cat:"デザート", id:"apple_pie", name:"ね願いごとアップルパイ", ingredients: { apple:12, milk:4 } }
 ];
 
 const el = (id) => document.getElementById(id);
@@ -264,7 +276,6 @@ function calc() {
   const days = totalMeals / MEALS_PER_DAY;
   el("summaryBadge").textContent = `合計 ${totalMeals}食（${days.toFixed(1)}日換算）`;
 
-  // 純粋な必要合計数を算出
   const need = new Map();
   state.recipeRows.forEach(row => {
     if (row.meals <= 0) return;
@@ -279,10 +290,8 @@ function calc() {
   resultGrid.innerHTML = "";
   let grandTotal = 0;
 
-// 追加されているレシピのIDを、重複を排除して順番通りに取得
+  // 修正箇所：追加されているレシピの順番で表示
   const recipeOrder = [...new Set(state.recipeRows.filter(r => r.meals > 0).map(r => r.recipeId))];
-  
-  // そのレシピに含まれる食材IDを順番に抽出
   const ingredientOrder = [];
   recipeOrder.forEach(rid => {
     const r = RECIPES.find(x => x.id === rid);
@@ -293,7 +302,6 @@ function calc() {
     });
   });
 
-  // 抽出した食材順（レシピでの登場順）で表示
   ingredientOrder.forEach(iid => {
     const ing = getIng(iid);
     if (!ing || exclude.has(iid)) return;

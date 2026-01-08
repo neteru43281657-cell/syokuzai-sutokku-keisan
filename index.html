@@ -225,8 +225,9 @@ function renderGrids() {
 document.querySelectorAll(".exChk, .repQty").forEach(input => {
   input.oninput = (e) => {
     // 9999上限チェック
-    if (e.target.classList.contains("repQty") && e.target.value > 9999) {
-      e.target.value = 9999;
+    if (e.target.classList.contains("repQty")) {
+      if (e.target.value > 9999) e.target.value = 9999;
+      if (e.target.value < 0) e.target.value = 0; // 負数を防ぐ
     }
     calc();
   };

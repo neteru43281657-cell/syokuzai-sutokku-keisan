@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>来週の食材ストック計算</title>
+  <style>
+    :root { --bg:#f6f7fb; --card:#fff; --text:#111; --muted:#666; --line:#e6e8f0; }
+    body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif; background:var(--bg); color:var(--text); }
+    header { padding:14px 16px; font-weight:800; background:#111; color:#fff; position:sticky; top:0; z-index:5; }
+    main { max-width: 980px; margin: 0 auto; padding: 12px; display:flex; flex-direction:column; gap: 12px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    label { font-size: 13px; color: var(--muted); }
+    select, input[type="number"], input[type="text"] {
+      padding:10px 10px; border:1px solid var(--line); border-radius:12px; font-size:14px; background:#fff;
+    }
+    button {
+      padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:#fff; font-weight:700; cursor:pointer;
+    }
+    button.primary { background:#111; color:#fff; border-color:#111; }
+    button.danger { background:#fff; color:#b00020; border-color:#f0c2c7; }
+    .small { font-size:12px; color:var(--muted); }
+    .divider { height:1px; background:var(--line); margin:10px 0; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+    .ing { display:flex; justify-content:space-between; gap:10px; padding:10px; border:1px solid var(--line); border-radius:12px; background:#fff; }
+    .ing .left { display:flex; gap:8px; align-items:center; }
+    .pill { font-size:12px; padding:4px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted); }
+    .qty { font-weight:800; }
+    .recipeRow { border:1px dashed var(--line); border-radius:14px; padding:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .recipeRow > * { flex: 0 0 auto; }
+    .recipeRow select { min-width: 240px; }
+    .rightGrow { flex: 1 1 auto; }
+  </style>
+</head>
+<body>
+<header>来週の食材ストック計算</header>
+
+<main>
+  <section class="card">
+    <div class="row" style="justify-content:space-between;">
+      <div>
+        <div style="font-weight:800; font-size:16px;">条件</div>
+        <div class="small">カテゴリを選び、料理と食数を入れると必要ストックを計算します（週=7日で計算）。</div>
+      </div>
+      <div class="row">
+        <label>週の日数</label>
+        <input id="days" type="number" min="1" max="30" value="7" style="width:90px;">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <div>
+        <label>カテゴリー（複数可）</label><br>
+        <select id="categories" multiple size="3">
+          <option value="curry">カレー・シチュー</option>
+          <option value="salad">サラダ</option>
+          <option value="dessert">デザート・ドリンク</option>
+        </select>
+        <div class="small">Ctrl/⌘で複数選択（スマホはタップで切替）</div>
+      </div>
+
+      <div class="rightGrow"></div>
+
+      <button id="addRecipe" class="primary">料理を追加</button>
+      <button id="clearAll" class="danger">全部クリア</button>
+    </div>
+
+    <div style="margin-top:10px;" id="recipeList"></div>
+  </section>
+
+  <section class="card">
+    <div style="font-weight:800; font-size:16px;">以下の食材は計算から除外する</div>
+    <div class="small">チェックした食材は結果から0扱い（“用意しない/別手段で賄う”想定）</div>
+    <div class="grid" id="excludeGrid"></div>
+  </section>
+
+  <section class="card">
+    <div style="font-weight:800; font-size:16px;">以下の食材は1日当たり☆個補完可能と仮定する</div>
+    <div class="small">各食材に「1日あたり補完できる個数」を入れると、週合計から（☆×日数）を減算します</div>
+    <div class="grid" id="replenishGrid"></div>
+  </section>
+
+  <section class="card">
+    <div class="row" style="justify-content:space-between; align-items:flex-end;">
+      <div>
+        <div style="font-weight:800; font-size:16px;">計算結果</div>
+        <div class="small">表示は「必要ストック数（減算後）」。マイナスになったら0に丸めます。</div>
+      </div>
+      <button id="calc" class="primary">計算する</button>
+    </div>
+
+    <div class="divider"></div>
+    <div id="resultGrid" class="grid"></div>
+  </section>
+</main>
+
+<script>
+/**
+ * 重要：
+ * - レシピ/食材データはサンプルです。増やす場合は INGREDIENTS / RECIPES を追加してください。
+ * - “1日あたり補完”は（☆×日数）で引く仕様（必要なら“1食あたり”に変更できます）
+ */
+
+const INGREDIENTS = [
+  {id:"apple", name:"とくせんリンゴ", icon:"🍎"},
+  {id:"honey", name:"あまいミツ", icon:"🍯"},
+  {id:"milk", name:"モーモーミルク", icon:"🥛"},
+  {id:"oil", name:"ピュアなオイル", icon:"🛢️"},
+  {id:"potato", name:"ほっこりポテト", icon:"🥔"},
+  {id:"avocado", name:"つやつやアボカド", icon:"🥑"},
+  {id:"tomato", name:"あんみんトマト", icon:"🍅"},
+  {id:"ginger", name:"ひんやりジンジャー", icon:"🫚"},
+  {id:"corn", name:"ワカクサコーン", icon:"🌽"},
+  {id:"cacao", name:"リラックスカカオ", icon:"🍫"},
+  {id:"egg", name:"とくせんエッグ", icon:"🥚"},
+  {id:"soy", name:"マメミート", icon:"🫘"},
+  {id:"mushroom", name:"あじわいキノコ", icon:"🍄"},
+  {id:"leek", name:"ふといながねぎ", icon:"🧅"},
+  {id:"meat", name:"げんきソーセージ", icon:"🌭"},
+  {id:"bean", name:"ワカクサ大豆", icon:"🫘"},
+  {id:"herb", name:"めざましハーブ", icon:"🌿"},
+  {id:"tails", name:"おおきいしっぽ", icon:"🐟"},
+  {id:"coffee", name:"スパークスコーヒー", icon:"☕"},
+];
+
+// サンプルレシピ（必要に応じて増やしてください）
+const RECIPES = [
+  {
+    id:"shiny_avocado_gratin",
+    category:"curry",
+    name:"しんりょくアボカドグラタン",
+    ingredients: { avocado:22, potato:20, milk:41, oil:32 }
+  },
+  {
+    id:"simple_curry",
+    category:"curry",
+    name:"シンプルカレー（例）",
+    ingredients: { tomato:10, oil:8, meat:12 }
+  },
+  {
+    id:"potato_salad",
+    category:"salad",
+    name:"ポテトサラダ（例）",
+    ingredients: { potato:18, egg:10, oil:6 }
+  },
+  {
+    id:"honey_yogurt",
+    category:"dessert",
+    name:"はちみつドリンク（例）",
+    ingredients: { honey:16, milk:14, cacao:6 }
+  }
+];
+
+const el = (id) => document.getElementById(id);
+
+const state = {
+  recipeRows: [] // {rowId, recipeId, meals}
+};
+
+function selectedCategories() {
+  const sel = Array.from(el("categories").selectedOptions).map(o => o.value);
+  return sel.length ? sel : ["curry","salad","dessert"];
+}
+
+function recipeOptionsHTML() {
+  const cats = new Set(selectedCategories());
+  const filtered = RECIPES.filter(r => cats.has(r.category));
+  const groups = {
+    curry: filtered.filter(r => r.category==="curry"),
+    salad: filtered.filter(r => r.category==="salad"),
+    dessert: filtered.filter(r => r.category==="dessert")
+  };
+  const catLabel = {curry:"カレー・シチュー", salad:"サラダ", dessert:"デザート・ドリンク"};
+  let html = `<option value="">料理を選択…</option>`;
+  for (const cat of ["curry","salad","dessert"]) {
+    if (!groups[cat].length) continue;
+    html += `<optgroup label="${catLabel[cat]}">`;
+    for (const r of groups[cat]) html += `<option value="${r.id}">${r.name}</option>`;
+    html += `</optgroup>`;
+  }
+  return html;
+}
+
+function addRecipeRow(initial={recipeId:"", meals:1}) {
+  const rowId = crypto.randomUUID();
+  state.recipeRows.push({rowId, ...initial});
+
+  const wrap = document.createElement("div");
+  wrap.className = "recipeRow";
+  wrap.dataset.rowId = rowId;
+
+  wrap.innerHTML = `
+    <div>
+      <label>料理</label><br>
+      <select class="recipeSel">${recipeOptionsHTML()}</select>
+    </div>
+
+    <div>
+      <label>何食作りますか？</label><br>
+      <select class="mealsSel">
+        ${Array.from({length:21}, (_,i)=>`<option value="${i+1}">${i+1}</option>`).join("")}
+      </select>
+      <span class="pill">食</span>
+    </div>
+
+    <div class="rightGrow small" style="min-width:220px;">
+      <span class="preview"></span>
+    </div>
+
+    <button class="removeBtn danger">削除</button>
+  `;
+
+  const recipeSel = wrap.querySelector(".recipeSel");
+  const mealsSel = wrap.querySelector(".mealsSel");
+  const preview = wrap.querySelector(".preview");
+
+  recipeSel.value = initial.recipeId || "";
+  mealsSel.value = String(initial.meals ?? 1);
+
+  function renderPreview() {
+    const rid = recipeSel.value;
+    const r = RECIPES.find(x => x.id === rid);
+    if (!r) { preview.textContent = ""; return; }
+    const parts = Object.entries(r.ingredients).map(([iid, q]) => {
+      const ing = INGREDIENTS.find(i=>i.id===iid);
+      return `${ing?.icon ?? "■"}${q}`;
+    });
+    preview.textContent = `材料: ${parts.join(" / ")}`;
+  }
+  renderPreview();
+
+  recipeSel.addEventListener("change", () => {
+    const s = state.recipeRows.find(x => x.rowId === rowId);
+    s.recipeId = recipeSel.value;
+    renderPreview();
+  });
+
+  mealsSel.addEventListener("change", () => {
+    const s = state.recipeRows.find(x => x.rowId === rowId);
+    s.meals = Number(mealsSel.value);
+    renderPreview();
+  });
+
+  wrap.querySelector(".removeBtn").addEventListener("click", () => {
+    state.recipeRows = state.recipeRows.filter(x => x.rowId !== rowId);
+    wrap.remove();
+  });
+
+  el("recipeList").appendChild(wrap);
+}
+
+function renderExcludeAndReplenish() {
+  const ex = el("excludeGrid");
+  const rep = el("replenishGrid");
+  ex.innerHTML = "";
+  rep.innerHTML = "";
+
+  for (const ing of INGREDIENTS) {
+    // exclude
+    const exItem = document.createElement("div");
+    exItem.className = "ing";
+    exItem.innerHTML = `
+      <div class="left">
+        <input type="checkbox" class="exChk" data-iid="${ing.id}">
+        <div>
+          <div>${ing.icon} ${ing.name}</div>
+          <div class="small">${ing.id}</div>
+        </div>
+      </div>
+      <div class="pill">除外</div>
+    `;
+    ex.appendChild(exItem);
+
+    // replenish
+    const repItem = document.createElement("div");
+    repItem.className = "ing";
+    repItem.innerHTML = `
+      <div class="left">
+        <input type="checkbox" class="repChk" data-iid="${ing.id}">
+        <div>
+          <div>${ing.icon} ${ing.name}</div>
+          <div class="small">1日あたり</div>
+        </div>
+      </div>
+      <div class="row" style="gap:6px;">
+        <input type="number" class="repQty" data-iid="${ing.id}" min="0" max="999" value="0" style="width:90px;">
+        <span class="pill">個</span>
+      </div>
+    `;
+    rep.appendChild(repItem);
+  }
+}
+
+function readExcludeSet() {
+  const set = new Set();
+  document.querySelectorAll(".exChk:checked").forEach(chk => set.add(chk.dataset.iid));
+  return set;
+}
+
+function readReplenishMap() {
+  const map = new Map(); // iid -> perDay
+  document.querySelectorAll(".repChk:checked").forEach(chk => {
+    const iid = chk.dataset.iid;
+    const qtyInput = document.querySelector(`.repQty[data-iid="${iid}"]`);
+    const perDay = Math.max(0, Math.min(999, Number(qtyInput.value || 0)));
+    map.set(iid, perDay);
+  });
+  return map;
+}
+
+function calc() {
+  const days = Math.max(1, Math.min(30, Number(el("days").value || 7)));
+  const exclude = readExcludeSet();
+  const replenish = readReplenishMap();
+
+  // 合計必要数（減算前）
+  const need = new Map(); // iid -> total needed
+  for (const row of state.recipeRows) {
+    if (!row.recipeId) continue;
+    const recipe = RECIPES.find(r => r.id === row.recipeId);
+    if (!recipe) continue;
+    const meals = Math.max(1, Math.min(21, Number(row.meals || 1)));
+    for (const [iid, perMeal] of Object.entries(recipe.ingredients)) {
+      const prev = need.get(iid) || 0;
+      need.set(iid, prev + perMeal * meals);
+    }
+  }
+
+  // 除外
+  for (const iid of exclude) need.set(iid, 0);
+
+  // 補完（☆×日数 を引く）
+  for (const [iid, perDay] of replenish.entries()) {
+    const prev = need.get(iid) || 0;
+    const next = prev - perDay * days;
+    need.set(iid, Math.max(0, next));
+  }
+
+  // 結果表示（必要数が多い順）
+  const list = INGREDIENTS.map(ing => ({
+    ...ing,
+    total: need.get(ing.id) || 0
+  })).filter(x => x.total > 0).sort((a,b) => b.total - a.total);
+
+  const out = el("resultGrid");
+  out.innerHTML = "";
+  if (!list.length) {
+    out.innerHTML = `<div class="small">結果がありません（料理が未選択、または全て除外/補完で0になりました）</div>`;
+    return;
+  }
+
+  for (const x of list) {
+    const item = document.createElement("div");
+    item.className = "ing";
+    item.innerHTML = `
+      <div class="left">
+        <div style="font-size:22px;">${x.icon}</div>
+        <div>
+          <div>${x.name}</div>
+          <div class="small">${x.id}</div>
+        </div>
+      </div>
+      <div class="qty">${x.total}個</div>
+    `;
+    out.appendChild(item);
+  }
+}
+
+function refreshRecipeSelects() {
+  document.querySelectorAll(".recipeSel").forEach(sel => {
+    const current = sel.value;
+    sel.innerHTML = recipeOptionsHTML();
+    sel.value = current; // 可能なら復元
+  });
+}
+
+el("addRecipe").addEventListener("click", () => addRecipeRow({recipeId:"", meals:1}));
+el("clearAll").addEventListener("click", () => {
+  state.recipeRows = [];
+  el("recipeList").innerHTML = "";
+  el("resultGrid").innerHTML = "";
+  // チェック類も戻す
+  document.querySelectorAll("input[type=checkbox]").forEach(x => x.checked = false);
+  document.querySelectorAll(".repQty").forEach(x => x.value = "0");
+});
+el("calc").addEventListener("click", calc);
+el("categories").addEventListener("change", refreshRecipeSelects);
+
+// init
+renderExcludeAndReplenish();
+addRecipeRow({recipeId:"shiny_avocado_gratin", meals:21});
+</script>
+</body>
+</html>

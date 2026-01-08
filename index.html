@@ -79,12 +79,11 @@ const INGREDIENTS = [
   { id:"tomato", name:"あんみんトマト", file:"あんみんトマト.webp" },
   { id:"cacao", name:"リラックスカカオ", file:"リラックスカカオ.webp" },
   { id:"tail", name:"おいしいシッポ", file:"おいしいシッポ.webp" },
-  { id:"soy", name:"ワカクサ大豆", file:"ワカクサ大豆.webp" }
+  { id:"soy", name:"ワカクサ大豆", file:"ワカクサ大豆.webp" }, // ←ここを修正しました
   { id:"corn", name:"ワカクサコーン", file:"ワカクサコーン.webp" },
   { id:"coffee", name:"めざましコーヒー", file:"めざましコーヒー.webp" },
   { id:"pumpkin", name:"ずっしりカボチャ", file:"ずっしりカボチャ.webp" },
-  { id:"avocado", name:"つやつやアボカド", file:"つやつやアボカド.webp" },
-
+  { id:"avocado", name:"つやつやアボカド", file:"つやつやアボカド.webp" }
 ];
 
 // レシピデータ（全カテゴリ統合）
@@ -204,7 +203,10 @@ function addRecipeRow() {
   const updateUI = () => {
     rowData.cat = cSel.value; rowData.recipeId = rSel.value; rowData.meals = Number(mInp.value);
     const r = RECIPES.find(x => x.id === rSel.value);
-    if (r) pre.innerHTML = Object.entries(r.ingredients).map(([id, q]) => `<span><img src="images/${getIng(id).file}" style="width:14px; margin-right:4px;">${q}</span>`).join("");
+    if (r) pre.innerHTML = Object.entries(r.ingredients).map(([id, q]) => {
+      const ing = getIng(id);
+      return `<span><img src="images/${ing ? ing.file : ''}" style="width:14px; margin-right:4px;">${q}</span>`;
+    }).join("");
     calc();
   };
 
@@ -219,7 +221,6 @@ function calc() {
   const days = totalMeals / MEALS_PER_DAY;
   el("summaryBadge").textContent = `合計 ${totalMeals}食（${days.toFixed(1)}日分）`;
 
-  // 食材ごとの合計必要数と「最初に出現した順序」を記録
   const totals = {};
   const order = [];
 
@@ -230,7 +231,7 @@ function calc() {
     Object.entries(r.ingredients).forEach(([id, q]) => {
       if (!(id in totals)) {
         totals[id] = 0;
-        order.push(id); // レシピに出てきた順番で配列に格納
+        order.push(id); 
       }
       totals[id] += (q * row.meals);
     });
@@ -240,10 +241,11 @@ function calc() {
   resGrid.innerHTML = "";
   let grandTotal = 0;
 
-  // 記録した順序（レシピ順）で出力
   order.forEach(id => {
     const ing = getIng(id);
+    if (!ing) return;
     const baseNeed = totals[id];
+    // 減算処理: 必要合計 - (1日の補完量 × 日数)
     const finalNeed = Math.max(0, Math.round(baseNeed - (repMap.get(id) * days)));
     
     if (finalNeed > 0) {

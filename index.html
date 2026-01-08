@@ -6,72 +6,105 @@
   <title>食材ストック計算 ver1.0.0</title>
 <style>
     :root {
-      /* ベースカラーの設定 */
-      --bg: #f0f4f8;        /* 淡い水色の背景 */
-      --card: #ffffff;      /* 純白のカード */
-      --text: #1a2b3c;      /* 濃い紺色の文字 */
-      --muted: #5a7d9a;     /* 青みがかったグレーの補助文字 */
-      --line: #d1e1f0;      /* 水色の境界線 */
-      --primary: #0056b3;   /* メインの青色 */
-      --accent: #e1f0ff;    /* 薄い水色の背景用 */
-      --danger: #d32f2f;    /* 警告の赤 */
+      --bg: #f0f4f8;
+      --card: #ffffff;
+      --text: #1a2b3c;
+      --muted: #5a7d9a;
+      --line: #d1e1f0;
+      --primary: #0056b3;
+      --accent: #e1f0ff;
+      --danger: #d32f2f;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.4; }
+    body { 
+      margin: 0; 
+      font-family: system-ui, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      line-height: 1.4;
+      overflow-x: hidden; /* 横揺れ防止 */
+    }
     
-    /* ヘッダーを濃い青に */
     header { padding: 12px 14px; font-weight: 800; background: var(--primary); color: #fff; position: sticky; top: 0; z-index: 5; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     
-    main { max-width: 980px; margin: 0 auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+    main { 
+      max-width: 100%; /* 幅を画面いっぱいに制限 */
+      margin: 0 auto; 
+      padding: 10px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+    }
     
-    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px; box-shadow: 0 4px 12px rgba(0,86,179,0.05); }
+    .card { 
+      background: var(--card); 
+      border: 1px solid var(--line); 
+      border-radius: 14px; 
+      padding: 10px; 
+      box-shadow: 0 4px 12px rgba(0,86,179,0.05);
+      width: 100%; /* カードが突き抜けないように固定 */
+    }
+
     .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     
-    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    /* グリッドの修正：画面幅に合わせて列数を変える */
+    .grid4 { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* 1つ最低80px。入り切らなければ自動改行 */
+      gap: 6px; 
+    }
     
     label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px; font-weight: bold; }
     
-    /* 入力フォームの枠線を青系に */
     select, input[type="number"] { padding: 6px; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; width: 100%; background: #fff; color: var(--text); }
-    select:focus, input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0,86,179,0.1); }
     
-    /* ボタンのデザイン変更 */
-    button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-weight: 800; cursor: pointer; font-size: 13px; color: var(--primary); transition: 0.2s; }
+    button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-weight: 800; cursor: pointer; font-size: 13px; color: var(--primary); }
     button.primary { background: var(--primary); color: #fff; border: none; }
-    button.primary:hover { opacity: 0.9; }
     button.danger { color: var(--danger); border-color: #f8bbd0; background: #fff5f5; }
-    button:disabled { opacity: 0.3; cursor: not-allowed; }
+    button:disabled { opacity: 0.3; }
     
-    /* バッジを青系に */
     .badge { font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--primary); background: var(--accent); font-weight: bold; }
     .divider { height: 1px; background: var(--line); margin: 8px 0; }
 
-    /* タイル（食材カード）の調整 */
-    .tile { border: 1px solid var(--line); border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 4px; background: #fff; align-items: center; text-align: center; }
-    .tileName { font-size: 10px; font-weight: 800; height: 2.4em; display: flex; align-items: center; justify-content: center; line-height: 1.2; color: var(--text); }
-    
-    .chkLabel { 
+    .tile { 
+      border: 1px solid var(--line); 
+      border-radius: 10px; 
+      padding: 6px; 
       display: flex; 
-      align-items: center; 
-      justify-content: center; 
+      flex-direction: column; 
       gap: 4px; 
-      font-size: 11px; 
-      color: var(--muted); 
-      cursor: pointer;
-      margin-top: 2px;
-      padding: 2px 4px;
-      border-radius: 4px;
+      background: #fff; 
+      align-items: center; 
+      text-align: center;
+      min-width: 0; /* 中身に引っ張られて広がらないように */
     }
-    .chkLabel:hover { background: var(--accent); }
-
-    .recipeRow { border: 1px solid var(--line); background: #fcfdfe; border-radius: 12px; padding: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 8px; position: relative; }
-    .removeBtn { position: absolute; top: 5px; right: 5px; border: none; background: none; color: #999; font-size: 18px; cursor: pointer; }
-    .removeBtn:hover { color: var(--danger); }
+    .icon { width: 32px; height: 32px; object-fit: contain; }
+    .tileName { font-size: 10px; font-weight: 800; height: 2.4em; display: flex; align-items: center; justify-content: center; line-height: 1.1; overflow: hidden; }
     
-    .preview { font-size: 11px; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; border-top: 1px solid var(--line); padding-top: 6px; }
-    .preview span { display: flex; align-items: center; background: var(--accent); color: var(--primary); padding: 2px 6px; border-radius: 6px; font-weight: bold; }
+    .recipeRow { 
+      border: 1px solid var(--line); 
+      background: #fcfdfe; 
+      border-radius: 12px; 
+      padding: 10px; 
+      display: flex; 
+      gap: 8px; 
+      flex-wrap: wrap; /* 狭い時に縦に並ぶように */
+      align-items: flex-end; 
+      margin-bottom: 8px; 
+      position: relative; 
+    }
+    .removeBtn { position: absolute; top: 5px; right: 5px; border: none; background: none; color: #999; font-size: 18px; cursor: pointer; }
+    
+    .preview { font-size: 10px; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; border-top: 1px solid var(--line); padding-top: 6px; width: 100%; }
+    .preview span { display: flex; align-items: center; background: var(--accent); color: var(--primary); padding: 2px 4px; border-radius: 4px; }
 
-    @media (max-width: 360px) { .grid4 { gap: 4px; } .tile { padding: 4px; } }
+    /* スマートフォン向けの微調整 */
+    @media (max-width: 480px) {
+      .grid4 { grid-template-columns: repeat(3, 1fr); } /* スマホでは3列に固定 */
+      .recipeRow > div { flex: 1 1 100%; } /* レシピ行の入力欄を横いっぱいに */
+      .recipeRow > div:nth-child(2) { flex: 1 1 30%; } /* カテゴリ */
+      .recipeRow > div:nth-child(3) { flex: 1 1 50%; } /* 料理 */
+    }
   </style>
 </head>
 <body>

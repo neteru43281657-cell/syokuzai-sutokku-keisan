@@ -63,14 +63,21 @@
       color: var(--danger); 
       font-size: 12px; 
       cursor: pointer; 
-      width: 14px; 
-      height: 14px; 
+      /* サイズを固定し、伸縮を禁止する */
+      width: 18px; 
+      height: 18px; 
+      min-width: 18px; /* 追加：楕円化防止 */
+      min-height: 18px; /* 追加：楕円化防止 */
+      flex-shrink: 0;   /* 追加：レイアウトによる圧縮を防止 */
+      
       border-radius: 50%; 
       display: flex; 
       align-items: center; 
       justify-content: center; 
       font-weight: bold; 
       z-index: 2; 
+      padding: 0; /* 追加：余計な余白をリセット */
+      line-height: 1; /* 追加：バツ印の縦位置調整 */
     }
     
     .recipeCol-cat { width: 85px; }

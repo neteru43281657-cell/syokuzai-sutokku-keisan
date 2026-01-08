@@ -35,12 +35,13 @@
     .rightGrow { flex: 1 1 auto; }
   </style>
 </head>
-  <script>
+<script>
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./service-worker.js");
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js");
+  });
 }
-  </script>
-
+</script>
 <body>
 <header>来週の食材ストック計算</header>
 

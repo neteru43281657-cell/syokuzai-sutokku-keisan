@@ -3,563 +3,68 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>来週の食材ストック計算</title>
-
+  <title>食材ストック計算</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <meta name="theme-color" content="#111111">
-
   <style>
     :root {
-      --bg:#f6f7fb; --card:#fff; --text:#111; --muted:#666; --line:#e6e8f0;
-      --danger:#b00020;
+      --bg: #f6f7fb; --card: #fff; --text: #111; --muted: #666; --line: #e6e8f0; --danger: #b00020;
     }
-    body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif; background:var(--bg); color:var(--text); }
-    header { padding:12px 14px; font-weight:800; background:#111; color:#fff; position:sticky; top:0; z-index:5; }
-
-    main { max-width: 980px; margin: 0 auto; padding: 10px; display:flex; flex-direction:column; gap: 10px; }
-    .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
-
-    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .col { display:flex; flex-direction:column; gap:8px; }
-    .rightGrow { flex: 1 1 auto; }
-
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+    header { padding: 12px 14px; font-weight: 800; background: #111; color: #fff; position: sticky; top: 0; z-index: 5; }
+    main { max-width: 980px; margin: 0 auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+    
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.04); overflow: hidden; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .col { display: flex; flex-direction: column; gap: 8px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    
     label { font-size: 12px; color: var(--muted); }
-    select, input[type="number"] { padding:8px 10px; border:1px solid var(--line); border-radius:12px; font-size:14px; background:#fff; }
-    button { padding:9px 12px; border:1px solid var(--line); border-radius:12px; background:#fff; font-weight:800; cursor:pointer; }
-    button.primary { background:#111; color:#fff; border-color:#111; }
-    button.danger { color: var(--danger); border-color:#f0c2c7; }
+    select, input[type="number"] { padding: 8px; border: 1px solid var(--line); border-radius: 12px; font-size: 14px; }
+    button { padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff; font-weight: 800; cursor: pointer; }
+    button.primary { background: #111; color: #fff; }
+    button.danger { color: var(--danger); border-color: #f0c2c7; }
+    
+    .badge { font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: #fff; }
+    .divider { height: 1px; background: var(--line); margin: 10px 0; }
 
-    .badge { font-size:12px; padding:4px 10px; border-radius:999px; border:1px solid var(--line); color:var(--muted); background:#fff; }
-    .divider { height:1px; background:var(--line); margin:10px 0; }
+    .tile { border: 1px solid var(--line); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 6px; background: #fff; }
+    .tileTopRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .icon { width: 34px; height: 34px; border-radius: 10px; object-fit: contain; }
+    .tileName { font-size: 12px; font-weight: 900; word-break: keep-all; }
+    .chkLabel { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; white-space: nowrap; }
+    .repWrap { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 80px; }
+    .repQty { width: 100%; max-width: 70px; }
+    .resultQty { font-size: 16px; font-weight: 900; }
+    .suffix { color: var(--muted); font-size: 12px; }
 
-    /* 省スペース：スマホは3列固定 */
-    .grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .recipeRow { border: 1px dashed var(--line); border-radius: 14px; padding: 10px; display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 8px; }
+    .preview { font-size: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
 
-    /* 食材タイル（除外/補完/結果 共通） */
-    .tile {
-      border:1px solid var(--line);
-      border-radius:12px;
-      background:#fff;
-      padding:8px;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      min-height: 72px;
-      justify-content:space-between;
-    }
-    .tileTop { display:flex; align-items:center; gap:8px; }
-    .icon {
-      width:34px; height:34px; border-radius:10px;
-      object-fit:contain; background:#fff;
-      flex: 0 0 auto;
-    }
-    .name { font-size:12px; font-weight:800; line-height:1.1; }
-    .muted { color:var(--muted); font-size:12px; }
-
-    .tileBottom { display:flex; align-items:center; justify-content:space-between; gap:6px; }
-    .qty { font-weight:900; font-size:14px; }
-    .suffix { color:var(--muted); font-size:12px; }
-
-    /* 条件：料理行 */
-    .recipeRow {
-      border:1px dashed var(--line);
-      border-radius:14px;
-      padding:10px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:flex-end;
-    }
-    .recipeRow select.recipeSel { min-width: 260px; }
-    .preview {
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.25;
-    }
-
-    /* 補完入力を小さめに */
-    .repQty { width:72px; padding:7px 8px; }
-
-    /* 結果は数字を目立たせる */
-    .resultQty { font-size:16px; font-weight:1000; }
-
-    /* PCは未保証とのことなので最小限。横に広い場合だけ少し余裕 */
-    @media (min-width: 520px) {
-      main { padding: 12px; }
-      .grid3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .icon { width:38px; height:38px; }
-    }
-    /* これ超重要：幅計算のズレで「はみ出す」を防ぐ */
-*, *::before, *::after { box-sizing: border-box; }
-
-.card { overflow: hidden; } /* 万が一のはみ出しもカード内で止める */
-
-/* タイル内の新レイアウト */
-.tileTopRow{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex-wrap:wrap;          /* スマホで詰まったら折り返す */
-}
-
-.tileName{
-  font-size:12px;
-  font-weight:900;
-  line-height:1.15;
-  margin-top:4px;
-  word-break: keep-all;     /* 変な折り返し抑制（日本語向け） */
-}
-
-/* チェック部分（除外/補完） */
-.chkLabel{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  font-size:12px;
-  color:var(--muted);
-  white-space: nowrap;      /* 「除外」「補完」が2行にならない */
-}
-
-/* 補完入力を「はみ出さない」ように */
-.repWrap{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  flex: 1 1 auto;           /* 余白があれば伸びる */
-  min-width: 120px;         /* つぶれすぎ防止 */
-}
-
-.repQty{
-  width: 72px;
-  max-width: 90px;          /* 大きくなりすぎ防止 */
-  padding:7px 8px;
-}
-
-.suffix{
-  white-space: nowrap;      /* 「個」が折り返さない */
-}
-
+    @media (min-width: 520px) { .icon { width: 38px; height: 38px; } }
   </style>
 </head>
-
 <body>
-<header>来週の食材ストック計算</header>
+
+<header>食材ストック計算</header>
 
 <main>
-  <!-- 条件 -->
   <section class="card">
-    <div class="row" style="justify-content:space-between; align-items:flex-start;">
+    <div class="row" style="justify-content: space-between;">
       <div>
-        <div style="font-weight:900; font-size:15px;">条件</div>
-        <div class="row" style="margin-top:6px;">
+        <div style="font-weight:900;">条件</div>
+        <div class="row" style="margin-top:4px;">
           <span class="badge">1日=3食</span>
-          <span class="badge" id="summaryBadge">合計 0食（0日換算）</span>
+          <span class="badge" id="summaryBadge">合計 0食</span>
         </div>
       </div>
-
-      <div class="col" style="min-width:160px;">
+      <div class="col">
         <button id="addRecipe" class="primary">料理を追加</button>
-        <button id="clearAll" class="danger">全部クリア</button>
+        <button id="clearAll" class="danger">クリア</button>
       </div>
     </div>
-
     <div id="recipeList" style="margin-top:10px;"></div>
   </section>
 
-  <!-- 除外 -->
   <section class="card">
-    <div style="font-weight:900; font-size:15px;">以下の食材は計算から除外する</div>
-    <div id="excludeGrid" class="grid3" style="margin-top:10px;"></div>
-  </section>
-
-  <!-- 補完 -->
-  <section class="card">
-    <div style="font-weight:900; font-size:15px;">以下の食材は1日当たりn個補完可能と仮定する</div>
-    <div id="replenishGrid" class="grid3" style="margin-top:10px;"></div>
-  </section>
-
-  <!-- 結果 -->
-  <section class="card">
-    <div class="row" style="justify-content:space-between; align-items:center;">
-      <div style="font-weight:900; font-size:15px;">計算結果</div>
-      <div class="row">
-        <span class="badge" id="totalBadge">総合計 0個</span>
-      </div>
-    </div>
-    <div class="divider"></div>
-    <div id="resultGrid" class="grid3"></div>
-  </section>
-</main>
-
-<script>
-/**
- * 仕様（根幹）
- * - 1日=3食
- * - 日数 = 合計食数 / 3（小数OK）
- * - 補完（n個/日）は（n × 日数）を必要量から減算
- * - 除外チェックの食材は 0 扱い
- * - 何食作る？で 0 を選ぶと、その行は計算に含めない（疑似削除）
- */
-
-const MEALS_PER_DAY = 3;
-const IMG_DIR = "images/";
-
-// 食材（19種）：ファイル名＝食材名.webp
-const INGREDIENTS = [
-  { id:"apple",    name:"とくせんリンゴ",   file:"とくせんリンゴ.webp" },
-  { id:"mushroom", name:"あじわいキノコ",   file:"あじわいキノコ.webp" },
-  { id:"ginger",   name:"あったかジンジャー", file:"あったかジンジャー.webp" },
-  { id:"honey",    name:"あまいミツ",       file:"あまいミツ.webp" },
-  { id:"tomato",   name:"あんみんトマト",   file:"あんみんトマト.webp" },
-  { id:"tail",     name:"おいしいシッポ",   file:"おいしいシッポ.webp" },
-  { id:"herb",     name:"げきからハーブ",   file:"げきからハーブ.webp" },
-  { id:"pumpkin",  name:"ずっしりカボチャ", file:"ずっしりカボチャ.webp" },
-  { id:"avocado",  name:"つやつやアボカド", file:"つやつやアボカド.webp" },
-  { id:"egg",      name:"とくせんエッグ",   file:"とくせんエッグ.webp" },
-  { id:"oil",      name:"ピュアなオイル",   file:"ピュアなオイル.webp" },
-  { id:"leek",     name:"ふといながねぎ",   file:"ふといながねぎ.webp" },
-  { id:"potato",   name:"ほっこりポテト",   file:"ほっこりポテト.webp" },
-  { id:"soymeat",  name:"マメミート",       file:"マメミート.webp" },
-  { id:"coffee",   name:"めざましコーヒー", file:"めざましコーヒー.webp" },
-  { id:"milk",     name:"モーモーミルク",   file:"モーモーミルク.webp" },
-  { id:"cacao",    name:"リラックスカカオ", file:"リラックスカカオ.webp" },
-  { id:"corn",     name:"ワカクサコーン",   file:"ワカクサコーン.webp" },
-  { id:"soy",      name:"ワカクサ大豆",     file:"ワカクサ大豆.webp" }
-];
-
-// サンプルレシピ（後で増やす前提）
-const RECIPES = [
-  {
-    id:"shiny_avocado_gratin",
-    category:"curry",
-    name:"しんりょくアボカドグラタン",
-    ingredients: { avocado:22, potato:20, milk:41, oil:32 }
-  },
-  {
-    id:"simple_curry",
-    category:"curry",
-    name:"シンプルカレー（例）",
-    ingredients: { tomato:10, oil:8, soymeat:12 }
-  },
-  {
-    id:"potato_salad",
-    category:"salad",
-    name:"ポテトサラダ（例）",
-    ingredients: { potato:18, egg:10, oil:6 }
-  },
-  {
-    id:"honey_drink",
-    category:"dessert",
-    name:"はちみつドリンク（例）",
-    ingredients: { honey:16, milk:14, cacao:6 }
-  }
-];
-
-const CATEGORY_LABEL = {
-  curry: "カレー・シチュー",
-  salad: "サラダ",
-  dessert: "デザート・ドリンク"
-};
-
-const el = (id) => document.getElementById(id);
-
-const state = { recipeRows: [] }; // {rowId, recipeId, meals}
-
-function imgSrc(file) {
-  // 日本語ファイル名対策：URLエンコード
-  return IMG_DIR + encodeURIComponent(file);
-}
-
-function ingById(id) {
-  return INGREDIENTS.find(x => x.id === id);
-}
-
-function ingIconHTML(iid) {
-  const ing = ingById(iid);
-  if (!ing) return "";
-  return `<img class="icon" src="${imgSrc(ing.file)}" alt="${ing.name}">`;
-}
-
-function recipeOptionsHTML() {
-  // 先頭の「料理を選択…」は出さない（要望対応）
-  const groups = {
-    curry: RECIPES.filter(r => r.category === "curry"),
-    salad: RECIPES.filter(r => r.category === "salad"),
-    dessert: RECIPES.filter(r => r.category === "dessert"),
-  };
-  let html = "";
-  for (const key of ["curry","salad","dessert"]) {
-    const list = groups[key];
-    if (!list.length) continue;
-    html += `<optgroup label="${CATEGORY_LABEL[key]}">`;
-    for (const r of list) html += `<option value="${r.id}">${r.name}</option>`;
-    html += `</optgroup>`;
-  }
-  return html;
-}
-
-function addRecipeRow(initial) {
-  const rowId = crypto.randomUUID();
-  const defaultRecipeId = RECIPES[0]?.id ?? "";
-  const row = {
-    rowId,
-    recipeId: initial?.recipeId ?? defaultRecipeId,
-    meals: initial?.meals ?? 0
-  };
-  state.recipeRows.push(row);
-
-  const wrap = document.createElement("div");
-  wrap.className = "recipeRow";
-  wrap.dataset.rowId = rowId;
-
-  wrap.innerHTML = `
-    <div>
-      <label>料理</label><br>
-      <select class="recipeSel">${recipeOptionsHTML()}</select>
-    </div>
-
-    <div>
-      <label>何食作る？</label><br>
-      <select class="mealsSel">
-        ${["0", ...Array.from({length:21},(_,i)=>String(i+1))].map(v => `<option value="${v}">${v}</option>`).join("")}
-      </select>
-      <span class="suffix">食</span>
-    </div>
-
-    <div class="rightGrow preview"></div>
-  `;
-
-  const recipeSel = wrap.querySelector(".recipeSel");
-  const mealsSel = wrap.querySelector(".mealsSel");
-  const preview = wrap.querySelector(".preview");
-
-  recipeSel.value = row.recipeId;
-  mealsSel.value = String(row.meals);
-
-  function renderPreview() {
-    const rid = recipeSel.value;
-    const r = RECIPES.find(x => x.id === rid);
-    if (!r) { preview.innerHTML = ""; return; }
-
-    const parts = Object.entries(r.ingredients).map(([iid, q]) => {
-      const ing = ingById(iid);
-      const name = ing ? ing.name : iid;
-      const icon = ing ? `<img class="icon" src="${imgSrc(ing.file)}" alt="${name}">` : "";
-      return `<span style="display:inline-flex; align-items:center; gap:6px; margin-right:10px;">${icon}<span>${q}</span></span>`;
-    });
-
-    // 省スペース：材料一覧だけ（文章は出さない）
-    preview.innerHTML = parts.join("");
-  }
-
-  renderPreview();
-
-  recipeSel.addEventListener("change", () => {
-    const s = state.recipeRows.find(x => x.rowId === rowId);
-    s.recipeId = recipeSel.value;
-    renderPreview();
-    scheduleCalc();
-  });
-
-  mealsSel.addEventListener("change", () => {
-    const s = state.recipeRows.find(x => x.rowId === rowId);
-    s.meals = Number(mealsSel.value);
-    scheduleCalc();
-  });
-
-  el("recipeList").appendChild(wrap);
-}
-
-function renderExcludeAndReplenish() {
-  const ex = el("excludeGrid");
-  const rep = el("replenishGrid");
-  ex.innerHTML = "";
-  rep.innerHTML = "";
-
-  for (const ing of INGREDIENTS) {
-    // 除外：アイコン＋□除外（上段）／食材名（下段）
-    const exItem = document.createElement("div");
-    exItem.className = "tile";
-    exItem.innerHTML = `
-      <div class="tileTopRow">
-        <img class="icon" src="${imgSrc(ing.file)}" alt="${ing.name}">
-        <label class="chkLabel">
-          <input type="checkbox" class="exChk" data-iid="${ing.id}">
-          除外
-        </label>
-      </div>
-      <div class="tileName">${ing.name}</div>
-    `;
-    ex.appendChild(exItem);
-
-    // 補完：アイコン＋□補完＋入力＋個（上段）／食材名（下段）
-    const repItem = document.createElement("div");
-    repItem.className = "tile";
-    repItem.innerHTML = `
-      <div class="tileTopRow">
-        <img class="icon" src="${imgSrc(ing.file)}" alt="${ing.name}">
-        <label class="chkLabel">
-          <input type="checkbox" class="repChk" data-iid="${ing.id}">
-          補完
-        </label>
-
-        <div class="repWrap">
-          <input type="number" class="repQty" data-iid="${ing.id}" min="0" max="999" value="0">
-          <span class="suffix">個</span>
-        </div>
-      </div>
-      <div class="tileName">${ing.name}</div>
-    `;
-    rep.appendChild(repItem);
-  }
-
-  // 変更のたびに即反映
-  document.querySelectorAll(".exChk").forEach(x => x.addEventListener("change", scheduleCalc));
-  document.querySelectorAll(".repChk").forEach(x => x.addEventListener("change", scheduleCalc));
-  document.querySelectorAll(".repQty").forEach(x => x.addEventListener("input", scheduleCalc));
-}
-
-
-function readExcludeSet() {
-  const set = new Set();
-  document.querySelectorAll(".exChk:checked").forEach(chk => set.add(chk.dataset.iid));
-  return set;
-}
-
-function readReplenishMap() {
-  const map = new Map(); // iid -> perDay
-  document.querySelectorAll(".repChk:checked").forEach(chk => {
-    const iid = chk.dataset.iid;
-    const qtyInput = document.querySelector(`.repQty[data-iid="${iid}"]`);
-    const perDay = Math.max(0, Math.min(999, Number(qtyInput.value || 0)));
-    map.set(iid, perDay);
-  });
-  return map;
-}
-
-// 即時反映（連続入力でも軽く）
-let calcTimer = null;
-function scheduleCalc() {
-  if (calcTimer) return;
-  calcTimer = setTimeout(() => {
-    calcTimer = null;
-    calc();
-  }, 0);
-}
-
-function calc() {
-  const exclude = readExcludeSet();
-  const replenish = readReplenishMap();
-
-  // 合計食数（0食行は無視）
-  let totalMeals = 0;
-  for (const row of state.recipeRows) {
-    const m = Number(row.meals || 0);
-    if (m > 0) totalMeals += m;
-  }
-
-  // 日数（小数OK）
-  const days = totalMeals / MEALS_PER_DAY;
-  el("summaryBadge").textContent = `合計 ${totalMeals}食（${(Math.round(days * 100) / 100)}日換算）`;
-
-  // 必要数（減算前）
-  const need = new Map(); // iid -> total
-  for (const row of state.recipeRows) {
-    const meals = Math.max(0, Math.min(21, Number(row.meals || 0)));
-    if (meals === 0) continue;
-
-    const recipe = RECIPES.find(r => r.id === row.recipeId);
-    if (!recipe) continue;
-
-    for (const [iid, perMeal] of Object.entries(recipe.ingredients)) {
-      need.set(iid, (need.get(iid) || 0) + perMeal * meals);
-    }
-  }
-
-  // 除外
-  for (const iid of exclude) need.set(iid, 0);
-
-  // 補完（n × 日数）
-  for (const [iid, perDay] of replenish.entries()) {
-    const prev = need.get(iid) || 0;
-    const next = prev - perDay * days;
-    need.set(iid, Math.max(0, next));
-  }
-
-  // 結果（多い順）
-  const list = INGREDIENTS.map(ing => ({
-    ...ing,
-    total: need.get(ing.id) || 0
-  }))
-    .filter(x => x.total > 0)
-    .sort((a,b) => b.total - a.total);
-
-  // 小数日があり得るので四捨五入（切り上げ運用にしたいなら Math.ceil に変更）
-  for (const x of list) x.total = Math.round(x.total);
-
-  // 総合計
-  const totalAll = list.reduce((sum, x) => sum + x.total, 0);
-  el("totalBadge").textContent = `総合計 ${totalAll}個`;
-
-  // 表示
-  const out = el("resultGrid");
-  out.innerHTML = "";
-
-  if (!list.length) {
-    out.innerHTML = `
-      <div class="muted" style="grid-column: 1 / -1; padding: 6px 2px;">
-        （必要ストックが0です）
-      </div>
-    `;
-    return;
-  }
-
-  for (const x of list) {
-    const item = document.createElement("div");
-    item.className = "tile";
-    item.innerHTML = `
-      <div class="tileTop">
-        <img class="icon" src="${imgSrc(x.file)}" alt="${x.name}">
-        <div class="name">${x.name}</div>
-      </div>
-      <div class="tileBottom">
-        <div class="resultQty">${x.total}<span class="suffix">個</span></div>
-      </div>
-    `;
-    out.appendChild(item);
-  }
-}
-
-// ボタン
-el("addRecipe").addEventListener("click", () => {
-  addRecipeRow({ recipeId: RECIPES[0]?.id ?? "", meals: 0 });
-  scheduleCalc();
-});
-
-el("clearAll").addEventListener("click", () => {
-  state.recipeRows = [];
-  el("recipeList").innerHTML = "";
-
-  document.querySelectorAll("input[type=checkbox]").forEach(x => x.checked = false);
-  document.querySelectorAll(".repQty").forEach(x => x.value = "0");
-
-  addRecipeRow({ recipeId: "shiny_avocado_gratin", meals: 0 });
-  scheduleCalc();
-});
-
-// init
-renderExcludeAndReplenish();
-addRecipeRow({ recipeId: "shiny_avocado_gratin", meals: 12 });
-scheduleCalc();
-</script>
-
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js");
-  });
-}
-</script>
-
-</body>
-</html>

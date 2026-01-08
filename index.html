@@ -3,20 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>食材ストック計算 ver1.0.1</title>
+  <title>食材ストック計算</title>
   <style>
     :root {
       --bg: #f6f7fb; --card: #fff; --text: #111; --muted: #666; --line: #e6e8f0; --danger: #b00020;
     }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.4; }
-    header { padding: 12px 14px; font-weight: 800; background: #111; color: #fff; position: sticky; top: 0; z-index: 5; }
+    
+    header { 
+      padding: 12px 14px; 
+      background: #111; 
+      color: #fff; 
+      position: sticky; 
+      top: 0; 
+      z-index: 10; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+    }
+    .ver-text { font-size: 10px; font-weight: normal; opacity: 0.7; }
+    .title-text { font-weight: 800; }
+
     main { max-width: 980px; margin: 0 auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
     
     .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
     .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     
-    /* グリッド崩れ対策：最小幅を設定 */
     .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
     
     label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px; }
@@ -29,9 +42,8 @@
     .badge { font-size: 11px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: #fff; }
     .divider { height: 1px; background: var(--line); margin: 12px 0; }
 
-    /* タイル内の要素が溢れないように高さを固定 */
     .tile { border: 1px solid var(--line); border-radius: 10px; padding: 8px 4px; display: flex; flex-direction: column; gap: 4px; background: #fff; align-items: center; text-align: center; min-height: 105px; justify-content: space-between; }
-    .icon { width: 32px; height: 32px; object-fit: contain; background: #f8f9fa; border-radius: 4px; }
+    .icon { width: 32px; height: 32px; object-fit: contain; } /* 背景を削除 */
     .tileName { font-size: 10px; font-weight: 800; height: 2.8em; display: flex; align-items: center; justify-content: center; line-height: 1.1; overflow: hidden; }
     
     .chkLabel { display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 11px; color: var(--muted); cursor: pointer; width: 100%; }
@@ -39,9 +51,27 @@
     .repQty { padding: 4px; font-size: 12px; text-align: center; border-radius: 6px; }
     .suffix { font-size: 10px; color: var(--muted); }
 
-    /* レシピ行の崩れ対策 */
     .recipeRow { border: 1px dashed var(--line); border-radius: 12px; padding: 12px; display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 12px; position: relative; }
-    .removeBtn { position: absolute; top: 8px; right: 8px; border: none; background: #f0f0f0; color: var(--danger); font-size: 14px; cursor: pointer; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    
+    /* 削除ボタンの微調整 */
+    .removeBtn { 
+      position: absolute; 
+      top: 4px; 
+      right: 4px; 
+      border: none; 
+      background: #eee; 
+      color: var(--danger); 
+      font-size: 12px; 
+      cursor: pointer; 
+      width: 18px; 
+      height: 18px; 
+      border-radius: 50%; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-weight: bold; 
+      z-index: 2; 
+    }
     
     .recipeCol-cat { width: 85px; }
     .recipeCol-main { flex: 1; min-width: 140px; }
@@ -50,7 +80,6 @@
     .preview { font-size: 11px; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; border-top: 1px solid #f0f1f5; padding-top: 8px; width: 100%; }
     .preview span { display: flex; align-items: center; background: #f0f1f5; padding: 2px 8px; border-radius: 6px; font-weight: 600; }
 
-    /* 極小画面用 */
     @media (max-width: 380px) { 
       .grid4 { gap: 4px; } 
       .tile { padding: 4px 2px; min-height: 95px; }
@@ -60,7 +89,10 @@
 </head>
 <body>
 
-<header>食材ストック計算 ver1.0.1</header>
+<header>
+  <span class="title-text">食材ストック計算</span>
+  <span class="ver-text">ver1.0.1</span>
+</header>
 
 <main>
   <section class="card">
@@ -200,7 +232,6 @@ const el = (id) => document.getElementById(id);
 let state = { recipeRows: [] };
 
 function getIng(id) { return INGREDIENTS.find(x => x.id === id); }
-// 画像がない場合に備えonerror等も考慮可能だが、一旦パス通りに出力
 function imgSrc(file) { return "images/" + encodeURIComponent(file); }
 
 function renderGrids() {
@@ -247,7 +278,7 @@ function addRecipeRow(init) {
   wrap.dataset.rowId = rowId;
   wrap.innerHTML = `
     <button class="removeBtn" title="削除">×</button>
-    <div class="recipeCol-cat"><label>カテゴリ</label><select class="catSel"><option>カレー</option><option>サラダ</option><option>デザート</option></select></div>
+    <div class="recipeCol-cat"><label>カテゴリー</label><select class="catSel"><option>カレー</option><option>サラダ</option><option>デザート</option></select></div>
     <div class="recipeCol-main"><label>料理</label><select class="recipeSel"></select></div>
     <div class="recipeCol-meals"><label>食数</label><select class="mealsSel"></select></div>
     <div class="preview"></div>`;
@@ -257,7 +288,6 @@ function addRecipeRow(init) {
   const updateRecipeList = () => {
     const filtered = RECIPES.filter(r => r.cat === cSel.value);
     rSel.innerHTML = filtered.map(r => `<option value="${r.id}">${r.name}</option>`).join("");
-    // 初期化時またはカテゴリ変更時に適切なIDを選択
     if (filtered.some(r => r.id === rowData.recipeId)) {
         rSel.value = rowData.recipeId;
     } else {
@@ -350,14 +380,11 @@ function calc() {
   resultGrid.innerHTML = "";
   let grandTotal = 0;
 
-  // 表示順を整理
-  const ingredientOrder = INGREDIENTS.map(i => i.id);
-
-  ingredientOrder.forEach(iid => {
+  INGREDIENTS.forEach(ing => {
+    const iid = ing.id;
     if (exclude.has(iid)) return;
     const finalNeed = Math.max(0, Math.ceil(netNeed.get(iid) || 0));
     if (finalNeed > 0) {
-      const ing = getIng(iid);
       grandTotal += finalNeed;
       resultGrid.innerHTML += `
         <div class="tile">

@@ -321,7 +321,7 @@ function calc() {
 
   const totalMeals = state.recipeRows.reduce((sum, r) => sum + r.meals, 0);
   const totalDays = totalMeals / MEALS_PER_DAY;
-  el("summaryBadge").textContent = `合計 ${totalMeals}食（${totalDays.toFixed(1)}日換算）`;
+  el("summaryBadge").textContent = `合計 ${totalMeals}食`;
 
   const netNeed = new Map();
   state.recipeRows.forEach(row => {

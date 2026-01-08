@@ -89,6 +89,56 @@
       .grid3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .icon { width:38px; height:38px; }
     }
+    /* これ超重要：幅計算のズレで「はみ出す」を防ぐ */
+*, *::before, *::after { box-sizing: border-box; }
+
+.card { overflow: hidden; } /* 万が一のはみ出しもカード内で止める */
+
+/* タイル内の新レイアウト */
+.tileTopRow{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;          /* スマホで詰まったら折り返す */
+}
+
+.tileName{
+  font-size:12px;
+  font-weight:900;
+  line-height:1.15;
+  margin-top:4px;
+  word-break: keep-all;     /* 変な折り返し抑制（日本語向け） */
+}
+
+/* チェック部分（除外/補完） */
+.chkLabel{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  color:var(--muted);
+  white-space: nowrap;      /* 「除外」「補完」が2行にならない */
+}
+
+/* 補完入力を「はみ出さない」ように */
+.repWrap{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex: 1 1 auto;           /* 余白があれば伸びる */
+  min-width: 120px;         /* つぶれすぎ防止 */
+}
+
+.repQty{
+  width: 72px;
+  max-width: 90px;          /* 大きくなりすぎ防止 */
+  padding:7px 8px;
+}
+
+.suffix{
+  white-space: nowrap;      /* 「個」が折り返さない */
+}
+
   </style>
 </head>
 
@@ -327,41 +377,38 @@ function renderExcludeAndReplenish() {
   rep.innerHTML = "";
 
   for (const ing of INGREDIENTS) {
-    // 除外
+    // 除外：アイコン＋□除外（上段）／食材名（下段）
     const exItem = document.createElement("div");
     exItem.className = "tile";
     exItem.innerHTML = `
-      <div class="tileTop">
+      <div class="tileTopRow">
         <img class="icon" src="${imgSrc(ing.file)}" alt="${ing.name}">
-        <div class="name">${ing.name}</div>
-      </div>
-      <div class="tileBottom">
-        <label class="muted" style="display:flex; align-items:center; gap:8px;">
+        <label class="chkLabel">
           <input type="checkbox" class="exChk" data-iid="${ing.id}">
           除外
         </label>
       </div>
+      <div class="tileName">${ing.name}</div>
     `;
     ex.appendChild(exItem);
 
-    // 補完（n個/日）
+    // 補完：アイコン＋□補完＋入力＋個（上段）／食材名（下段）
     const repItem = document.createElement("div");
     repItem.className = "tile";
     repItem.innerHTML = `
-      <div class="tileTop">
+      <div class="tileTopRow">
         <img class="icon" src="${imgSrc(ing.file)}" alt="${ing.name}">
-        <div class="name">${ing.name}</div>
-      </div>
-      <div class="tileBottom">
-        <label class="muted" style="display:flex; align-items:center; gap:8px;">
+        <label class="chkLabel">
           <input type="checkbox" class="repChk" data-iid="${ing.id}">
           補完
         </label>
-        <div style="display:flex; align-items:center; gap:6px;">
+
+        <div class="repWrap">
           <input type="number" class="repQty" data-iid="${ing.id}" min="0" max="999" value="0">
           <span class="suffix">個</span>
         </div>
       </div>
+      <div class="tileName">${ing.name}</div>
     `;
     rep.appendChild(repItem);
   }
@@ -371,6 +418,7 @@ function renderExcludeAndReplenish() {
   document.querySelectorAll(".repChk").forEach(x => x.addEventListener("change", scheduleCalc));
   document.querySelectorAll(".repQty").forEach(x => x.addEventListener("input", scheduleCalc));
 }
+
 
 function readExcludeSet() {
   const set = new Set();

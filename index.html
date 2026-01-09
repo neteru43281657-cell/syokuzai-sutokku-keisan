@@ -493,12 +493,23 @@ function calc() {
   el("summaryBadge").textContent = `合計 ${totalMeals}食 / 21食`;
 
   const netNeed = new Map();
+  // 表示順を管理するための配列
+  const displayOrder = [];
+
   state.recipeRows.forEach(row => {
     if (row.meals <= 0) return;
     const r = RECIPES.find(x => x.id === row.recipeId);
     if (!r) return;
+    
     const rowDays = row.meals / MEALS_PER_DAY;
+    
+    // 料理データ(RECIPES)に定義されている食材の並び順でループ
     Object.entries(r.ingredients).forEach(([iid, qtyPerMeal]) => {
+      // まだ displayOrder に入っていない食材なら追加（これで料理ごとの並び順を保持）
+      if (!displayOrder.includes(iid)) {
+        displayOrder.push(iid);
+      }
+
       const gross = qtyPerMeal * row.meals;
       const rowReplenish = (replenishMap.get(iid) || 0) * rowDays;
       const currentNet = netNeed.get(iid) || 0;
@@ -510,9 +521,12 @@ function calc() {
   resultGrid.innerHTML = "";
   let grandTotal = 0;
 
-  INGREDIENTS.forEach(ing => {
-    const iid = ing.id;
+  // 全食材リストではなく、料理から抽出した並び順(displayOrder)で出力
+  displayOrder.forEach(iid => {
     if (exclude.has(iid)) return;
+    const ing = getIng(iid);
+    if (!ing) return;
+
     const finalNeed = Math.max(0, Math.ceil(netNeed.get(iid) || 0));
     if (finalNeed > 0) {
       grandTotal += finalNeed;

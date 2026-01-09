@@ -38,7 +38,7 @@
     }
     
     header { 
-      padding: 14px 20px; 
+      padding: 10px 20px; 
       background: var(--main);
       color: #fff; 
       position: sticky; 
@@ -50,7 +50,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     .title-text { font-weight: 800; letter-spacing: 0.03em; font-size: 18px; }
-    .ver-text { font-size: 11px; font-weight: 400; opacity: 0.8; margin-top: 4px; }
+    .ver-text { font-size: 11px; font-weight: 400; opacity: 0.8; margin-top: 2px; }
 
     main { max-width: 980px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
     
@@ -119,11 +119,10 @@
     .total-badge { background: var(--main); color: #fff; border: none; padding: 4px 16px; }
     .divider { height: 1px; background: var(--line); margin: 16px 0; }
 
-    /* .tile の左右パディングを微調整 */
     .tile { 
       border: 1px solid var(--line); 
       border-radius: 12px; 
-      padding: 6px 3px; /* 4pxから3pxに微減して内側の有効幅を確保 */
+      padding: 6px 3px; 
       display: flex; 
       flex-direction: column; 
       gap: 4px; 
@@ -136,7 +135,6 @@
     }
     .icon { width: 30px; height: 30px; object-fit: contain; }
     
-    /* ③ 9文字でも1行に収めるための設定 */
     .tileName { 
       font-size: 8.5px; 
       font-weight: 700; 
@@ -149,23 +147,21 @@
     
     .chkLabel { display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 10px; cursor: pointer; width: 100%; font-weight: 600; }
     .repInputRow { display: flex; align-items: center; justify-content: center; gap: 2px; width: 100%; }
-    /* .repQty を3桁特化で調整 */
+    
     .repQty { 
-      padding: 4px 1px; /* 左右の余白を削って数字のスペースに充てる */
+      padding: 4px 1px; 
       font-size: 12px; 
       text-align: center; 
       border-radius: 8px; 
       border: 1px solid var(--line); 
       font-weight: 800; 
       width: 100%; 
-      max-width: 48px; /* 44pxから48pxへ拡大 */
+      max-width: 48px; 
       min-width: 32px;
-      /* 数字のスピンボタン（上下矢印）を消して幅を確保する設定 */
       appearance: textfield;
       -moz-appearance: textfield;
     }
   
-      /* スピンボタン（上下矢印）を完全に非表示にする（Chrome, Safari用） */
     .repQty::-webkit-outer-spin-button,
     .repQty::-webkit-inner-spin-button {
       -webkit-appearance: none;
@@ -208,7 +204,6 @@
       .grid5 { grid-template-columns: repeat(4, 1fr); gap: 4px; }
       main { padding: 12px; }
       .tile { padding: 5px 0px; min-height: 88px; }
-      /* スマホ4列時に9文字を確実に1行にする微調整 */
       .tileName { 
         font-size: 7.2px; 
         letter-spacing: -0.06em; 
@@ -220,9 +215,23 @@
 <body>
 
 <header>
-  <span class="title-text">食材ストック計算</span>
-  <span class="ver-text">ver 1.0.1</span>
+  <div>
+    <div class="title-text">食材ストック計算</div>
+    <div class="ver-text">ver 1.0.1</div>
+  </div>
+  <a href="javascript:void(0)" id="openNotice" style="color:#fff; font-size:12px; font-weight:700; text-decoration:underline;">注意事項</a>
 </header>
+
+<div id="noticeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center; padding:20px;">
+  <div class="card" style="max-width:400px; width:100%; position:relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+    <div style="font-weight:900; margin-bottom:12px; border-bottom:1px solid var(--line); padding-bottom:8px; color:var(--text);">ご利用上の注意</div>
+    <p style="font-size:13px; color:var(--text); line-height:1.6; margin-bottom:20px;">
+      このアプリは非公式であり、<strong>ﾈﾃﾙ.exe（@suiminloop.bsky.social）</strong>が個人で作ったものです。<br><br>
+      ご利用いただく際は自己責任でお願いします🙇
+    </p>
+    <button id="closeNotice" class="primary" style="width:100%;">閉じる</button>
+  </div>
+</div>
 
 <main>
   <section class="card">
@@ -352,6 +361,7 @@ const RECIPES = [
   { cat:"デザート", id:"sweet_potato", name:"じゅうなんスイートポテト", ingredients: { potato:9, milk:5 } },
   { cat:"デザート", id:"apple_pie", name:"ねがいごとアップルパイ", ingredients: { apple:12, milk:4 } }
 ];
+
 
 const el = (id) => document.getElementById(id);
 let state = { recipeRows: [] };
@@ -516,6 +526,17 @@ function calc() {
   });
   el("totalBadge").textContent = `総合計 ${grandTotal}個`;
 }
+
+// 注意事項モーダルの制御
+const modal = el("noticeModal");
+const openBtn = el("openNotice");
+const closeBtn = el("closeNotice");
+
+openBtn.onclick = () => { modal.style.display = "flex"; };
+closeBtn.onclick = () => { modal.style.display = "none"; };
+window.onclick = (event) => {
+  if (event.target == modal) { modal.style.display = "none"; }
+};
 
 el("addRecipe").onclick = () => addRecipeRow({meals: 0});
 el("clearAll").onclick = () => { 

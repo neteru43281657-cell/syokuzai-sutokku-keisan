@@ -1,4 +1,4 @@
-const CACHE_NAME = "stockcalc-v2";
+const CACHE_NAME = "stockcalc-v3";
 const ASSETS = [
   "./",
   "./index.html",

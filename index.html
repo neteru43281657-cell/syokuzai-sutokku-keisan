@@ -2,8 +2,13 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>食材ストック計算</title>
+  
+  <link rel="apple-touch-icon" href="images/アイコン.png">
+  <link rel="icon" type="image/png" href="images/アイコン.png">
+  <link rel="manifest" href="manifest.webmanifest">
+
   <style>
     :root {
       --bg: #f5f8fa; 
@@ -33,12 +38,11 @@
       top: 0; 
       z-index: 10; 
       display: flex; 
-      justify-content: space-between; /* 左右に振り分け */
+      justify-content: space-between; 
       align-items: center;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     .title-text { font-weight: 800; letter-spacing: 0.03em; font-size: 18px; }
-    /* バナー内右側のバージョン表記 */
     .ver-text { font-size: 11px; font-weight: 400; opacity: 0.8; margin-top: 4px; }
 
     main { max-width: 980px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
@@ -60,22 +64,14 @@
     }
 
     .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .grid5 { 
-          display: grid; 
-          grid-template-columns: repeat(auto-fill, minmax(18%, 1fr)); /* 幅に合わせて自動調整 */
-          gap: 8px; 
-          width: 100%; /* 親要素内に収める */
-        }
     
-        /* モバイル表示時の調整 */
-        @media (max-width: 480px) { 
-          .grid5 { 
-            grid-template-columns: repeat(4, 1fr); /* スマホではきっちり4列 */
-            gap: 4px; 
-          }
-          .tile { padding: 6px 2px; min-height: 90px; } /* 少しスリムに */
-          .tileName { font-size: 9px; }
-        }
+    /* 食材カードのはみ出し防止用グリッド設定 */
+    .grid5 { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); 
+      gap: 8px; 
+      width: 100%;
+    }
     
     label { font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px; }
     
@@ -129,6 +125,8 @@
       text-align: center; 
       min-height: 100px; 
       justify-content: space-between;
+      min-width: 0;
+      overflow: hidden;
     }
     .icon { width: 32px; height: 32px; object-fit: contain; }
     .tileName { font-size: 10px; font-weight: 700; width: 100%; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -155,7 +153,7 @@
       position: absolute; top: -8px; right: -8px; 
       border: 1px solid var(--line); background: #fff; color: var(--danger); 
       font-size: 16px; 
-      width: 26px; height: 26px; /* 幅と高さを等しく */
+      width: 26px; height: 26px;
       padding: 0;
       border-radius: 50%; 
       display: flex; align-items: center; justify-content: center; 
@@ -171,9 +169,12 @@
     .preview span { display: flex; align-items: center; background: var(--main-soft); color: var(--main); padding: 3px 8px; border-radius: 8px; font-weight: 700; border: 1px solid #d0e7ff; }
 
     @media (max-width: 480px) { 
-      .grid5 { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+      .grid5 { grid-template-columns: repeat(4, 1fr); gap: 4px; }
       main { padding: 12px; }
       .title-text { font-size: 16px; }
+      .tile { padding: 6px 2px; min-height: 90px; }
+      .tileName { font-size: 8px; }
+      .repQty { font-size: 11px; }
     }
   </style>
 </head>
@@ -220,7 +221,6 @@
 </main>
 
 <script>
-/* ロジック部分は変更なし */
 const MEALS_PER_DAY = 3;
 const MAX_RECIPE_ROWS = 9;
 const MAX_TOTAL_MEALS = 21;
@@ -310,7 +310,7 @@ const RECIPES = [
   { cat:"デザート", id:"soy_cake", name:"かるわざソイケーキ", ingredients: { egg:8, soy:7 } },
   { cat:"デザート", id:"veg_juice", name:"マイペースやさいジュース", ingredients: { tomato:9, apple:7 } },
   { cat:"デザート", id:"ginger_tea", name:"ひのこのジンジャーティー", ingredients: { ginger:9, apple:7 } },
-  { cat:"デザート", id:"sweet_potato", name:"じゅくせいスイートポテト", ingredients: { potato:9, milk:5 } },
+  { cat:"デザート", id:"sweet_potato", name:"じゅうかついスイートポテト", ingredients: { potato:9, milk:5 } },
   { cat:"デザート", id:"apple_pie", name:"ねがいごとアップルパイ", ingredients: { apple:12, milk:4 } }
 ];
 
@@ -336,7 +336,7 @@ function renderGrids() {
         <img class="icon" src="${imgSrc(ing.file)}" alt="">
         <div class="repInputRow">
           <input type="number" class="repQty" data-iid="${ing.id}" placeholder="0">
-          <span class="suffix">個</span>
+          <span class="suffix" style="font-size:10px;">個</span>
         </div>
       </div>`;
   });
@@ -416,14 +416,12 @@ function addRecipeRow(init) {
 
 function updateAllMealDropdowns() {
   const currentTotal = state.recipeRows.reduce((sum, r) => sum + r.meals, 0);
-  
   state.recipeRows.forEach(row => {
     const wrap = document.querySelector(`.recipeRow[data-row-id="${row.rowId}"]`);
     if (!wrap) return;
     const mSel = wrap.querySelector(".mealsSel");
     const otherMeals = currentTotal - row.meals;
     const maxAvailable = MAX_TOTAL_MEALS - otherMeals;
-    
     const prevVal = Number(mSel.value) || row.meals;
     mSel.innerHTML = "";
     for (let i = 0; i <= maxAvailable; i++) {
@@ -436,9 +434,7 @@ function updateAllMealDropdowns() {
   });
 }
 
-function checkAddButton() {
-  el("addRecipe").disabled = state.recipeRows.length >= MAX_RECIPE_ROWS;
-}
+function checkAddButton() { el("addRecipe").disabled = state.recipeRows.length >= MAX_RECIPE_ROWS; }
 
 function calc() {
   const exclude = new Set([...document.querySelectorAll(".exChk:checked")].map(c => c.dataset.iid));
@@ -452,7 +448,6 @@ function calc() {
     if (row.meals <= 0) return;
     const r = RECIPES.find(x => x.id === row.recipeId);
     if (!r) return;
-    
     const rowDays = row.meals / MEALS_PER_DAY;
     Object.entries(r.ingredients).forEach(([iid, qtyPerMeal]) => {
       const gross = qtyPerMeal * row.meals;
@@ -484,7 +479,6 @@ function calc() {
 }
 
 el("addRecipe").onclick = () => addRecipeRow({meals: 0});
-
 el("clearAll").onclick = () => { 
   el("recipeList").innerHTML = ""; 
   state.recipeRows = []; 

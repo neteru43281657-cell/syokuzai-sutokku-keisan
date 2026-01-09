@@ -147,39 +147,77 @@
     
     .chkLabel { display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 10px; cursor: pointer; width: 100%; font-weight: 600; }
     
-    /* 入力エリアの幅とフォントサイズを微調整 */
+    /* 1. 条件設定エリア（レシピ行）のレイアウト修正 */
+    .recipeRow {
+      display: flex;
+      align-items: flex-end; /* ラベルの底辺に合わせる */
+      gap: 6px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed var(--line);
+      flex-wrap: nowrap; /* 縦に割れないように固定 */
+    }
+
+    .recipeCol-cat { width: 75px; flex-shrink: 0; }
+    .recipeCol-main { flex-grow: 1; min-width: 0; } /* 料理名を優先的に広げる */
+    .recipeCol-meals { width: 55px; flex-shrink: 0; }
+    
+    .recipeRow select {
+      padding: 8px 4px;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+
+    .removeBtn {
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #f8d7da;
+      color: var(--danger);
+      border: none;
+      font-size: 16px;
+      line-height: 1;
+      margin-bottom: 8px; /* 入力欄の高さに合わせる */
+    }
+
+    /* 2. 入力欄（999表示）のさらなる微調整 */
     .repInputRow { 
       display: flex; 
       align-items: center; 
       justify-content: center; 
-      gap: 2px; /* 少し広げた */
-      width: 95%; /* 85%から拡大して余裕を持たせる */
-      margin-bottom: 2px;
+      gap: 1px;
+      width: 98%; /* ギリギリまで広げる */
     }
 
     .repQty { 
-      padding: 3px 1px; 
-      font-size: 11px; /* 12pxから11pxに微調整して3桁を収める */
+      padding: 3px 0px; 
+      font-size: 12px; /* 読みやすく少し戻す */
       text-align: center; 
       border-radius: 6px; 
       border: 1px solid var(--line); 
       font-weight: 800;
-      width: 44px !important; /* 38pxから44pxに広げて999を確実に表示 */
-      height: 24px;
+      width: 46px !important; /* 44pxから46pxへさらに拡大 */
+      height: 26px;
       appearance: textfield;
       background: #fdfdfd;
     }
 
+    /* 3. スマホ表示時の最適化 */
     @media (max-width: 480px) { 
       .grid5 { grid-template-columns: repeat(4, 1fr); gap: 4px; }
-      main { padding: 12px; }
-      .tile { padding: 5px 0px; min-height: 82px; }
-      .tileName { 
-        font-size: 7.2px; 
-        letter-spacing: -0.06em; 
+      .tile { padding: 5px 0px; min-height: 85px; }
+      .recipeRow { gap: 4px; }
+      .recipeCol-cat { width: 65px; }
+      .recipeCol-meals { width: 48px; }
+      .recipeRow select { font-size: 11px; padding: 6px 2px; }
+      
+      .repQty { 
+        font-size: 11px; 
+        width: 42px !important; /* スマホでも3桁が余裕で入るサイズ */
+        height: 24px; 
       }
-      /* スマホ表示でも3桁が隠れない最小幅 */
-      .repQty { font-size: 10.5px; width: 40px !important; height: 22px; }
+      .preview { font-size: 9px; } /* 食材アイコンのプレビューを少し小さく */
     }
   </style>
 </head>

@@ -123,7 +123,7 @@
     .tile { 
       border: 1px solid var(--line); 
       border-radius: 12px; 
-      padding: 6px 1px; 
+      padding: 6px 4px; /* 左右に少し余裕を持たせる */
       display: flex; 
       flex-direction: column; 
       gap: 4px; 
@@ -149,8 +149,18 @@
     
     .chkLabel { display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 10px; cursor: pointer; width: 100%; font-weight: 600; }
     .repInputRow { display: flex; align-items: center; justify-content: center; gap: 2px; width: 100%; }
-    .repQty { padding: 4px; font-size: 12px; text-align: center; border-radius: 8px; border: 1px solid var(--line); font-weight: 800; }
-    
+    .repQty { 
+      padding: 4px 2px; 
+      font-size: 12px; 
+      text-align: center; 
+      border-radius: 8px; 
+      border: 1px solid var(--line); 
+      font-weight: 800; 
+      width: 100%; 
+      max-width: 44px; /* 「999」が入る最適な幅に制限 */
+      min-width: 32px;
+    }
+  
     .recipeRow { 
       border: 1px solid var(--line); 
       background: #fcfdfe;

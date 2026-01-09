@@ -1,8 +1,20 @@
 {
-  "name": "来週の食材ストック計算",
-  "short_name": "食材ストック計算",
-  "start_url": "./",
+  "name": "食材ストック計算",
+  "short_name": "食材ストック",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#111111",
-  "theme_color": "#111111"
+  "background_color": "#f5f8fa",
+  "theme_color": "#007bff",
+  "icons": [
+    {
+      "src": "images/アイコン.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "images/アイコン.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
 }

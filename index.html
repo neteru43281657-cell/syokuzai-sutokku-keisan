@@ -136,13 +136,16 @@
     .icon { width: 30px; height: 30px; object-fit: contain; }
     
     .tileName { 
-      font-size: 8.5px; 
+      font-size: 8px; /* 8.5pxから8pxに微調整 */
       font-weight: 700; 
       width: 100%; 
+      /* 以下、長い名前が枠を突き抜けないための保険 */
       white-space: nowrap; 
       overflow: hidden; 
-      letter-spacing: -0.04em; 
-      padding: 0 1px;
+      text-overflow: clip; 
+      letter-spacing: -0.05em; /* 字間を少し詰め、横幅の余裕を確保 */
+      padding: 0 2px;
+      display: block;
     }
     
     .chkLabel { display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 10px; cursor: pointer; width: 100%; font-weight: 600; }
@@ -201,14 +204,11 @@
     .preview span { display: flex; align-items: center; background: var(--main-soft); color: var(--main); padding: 3px 8px; border-radius: 8px; font-weight: 700; border: 1px solid #d0e7ff; }
 
     @media (max-width: 480px) { 
-      .grid5 { grid-template-columns: repeat(4, 1fr); gap: 4px; }
-      main { padding: 12px; }
-      .tile { padding: 5px 0px; min-height: 88px; }
+      /* スマホ等、より狭い画面での設定 */
       .tileName { 
-        font-size: 7.2px; 
+        font-size: 7px; /* 7.2pxから7pxに下げて、9文字を確実に収める */
         letter-spacing: -0.06em; 
       }
-      .repQty { font-size: 11px; }
     }
   </style>
 </head>

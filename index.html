@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>食材ストック計算</title>
   
-  <link rel="apple-touch-icon" href="images/アイコン.png">
-  <link rel="icon" type="image/png" href="images/アイコン.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="images/アイコン.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/アイコン.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="images/アイコン.png">
   <link rel="manifest" href="manifest.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="食材ストック">
 
   <style>
     :root {
@@ -65,7 +68,6 @@
 
     .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     
-    /* 食材カードのはみ出し防止用グリッド設定 */
     .grid5 { 
       display: grid; 
       grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); 
@@ -115,21 +117,29 @@
 
     .tile { 
       border: 1px solid var(--line); 
-      border-radius: 14px; 
-      padding: 8px 4px; 
+      border-radius: 12px; 
+      padding: 6px 2px; 
       display: flex; 
       flex-direction: column; 
-      gap: 6px; 
+      gap: 4px; 
       background: #fff; 
       align-items: center; 
       text-align: center; 
-      min-height: 100px; 
+      min-height: 95px; 
       justify-content: space-between;
       min-width: 0;
-      overflow: hidden;
     }
-    .icon { width: 32px; height: 32px; object-fit: contain; }
-    .tileName { font-size: 10px; font-weight: 700; width: 100%; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .icon { width: 30px; height: 30px; object-fit: contain; }
+    
+    /* ② 食材名の1行表示設定 */
+    .tileName { 
+      font-size: 9px; 
+      font-weight: 700; 
+      width: 100%; 
+      white-space: nowrap; 
+      overflow: visible; /* 見切れ防止 */
+      letter-spacing: -0.02em; /* 文字間隔を少し詰める */
+    }
     
     .chkLabel { display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 10px; cursor: pointer; width: 100%; font-weight: 600; }
     .repInputRow { display: flex; align-items: center; justify-content: center; gap: 2px; width: 100%; }
@@ -148,7 +158,6 @@
       position: relative;
     }
     
-    /* 削除ボタンの正円修正 */
     .removeBtn { 
       position: absolute; top: -8px; right: -8px; 
       border: 1px solid var(--line); background: #fff; color: var(--danger); 
@@ -171,9 +180,8 @@
     @media (max-width: 480px) { 
       .grid5 { grid-template-columns: repeat(4, 1fr); gap: 4px; }
       main { padding: 12px; }
-      .title-text { font-size: 16px; }
-      .tile { padding: 6px 2px; min-height: 90px; }
-      .tileName { font-size: 8px; }
+      .tile { padding: 4px 1px; min-height: 85px; }
+      .tileName { font-size: 7.5px; letter-spacing: -0.05em; } /* スマホではさらに凝縮 */
       .repQty { font-size: 11px; }
     }
   </style>
@@ -212,7 +220,7 @@
 
   <section class="result-card">
     <div class="row" style="justify-content: space-between;">
-      <div style="font-weight:900; font-size:16px; color:var(--main);">計算結果</div>
+      <div style="font-weight:900; font-size:16px; color:var(--main);">必要合計数</div>
       <span class="badge total-badge" id="totalBadge">総合計 0個</span>
     </div>
     <div class="divider" style="background: var(--main); opacity: 0.1;"></div>
@@ -258,7 +266,7 @@ const RECIPES = [
   { cat:"カレー", id:"tail_curry", name:"あぶりテールカレー", ingredients: { tail:8, herb:25 } },
   { cat:"カレー", id:"leek_curry", name:"からくちネギもりカレー", ingredients: { leek:14, ginger:10, herb:8 } },
   { cat:"カレー", id:"punch_curry", name:"ピヨピヨパンチ辛口カレー", ingredients: { coffee:11, herb:11, honey:11 } },
-  { cat:"カレー", id:"corn_stew", name:"じゅうなおコーンシチュー", ingredients: { corn:14, milk:8, potato:8 } },
+  { cat:"カレー", id:"corn_stew", name:"じゅうなんコーンシチュー", ingredients: { corn:14, milk:8, potato:8 } },
   { cat:"カレー", id:"parent_child_curry", name:"おやこあいカレー", ingredients: { honey:12, apple:11, egg:8, potato:4 } },
   { cat:"カレー", id:"mushroom_curry", name:"キノコのほうしカレー", ingredients: { mushroom:14, potato:9 } },
   { cat:"カレー", id:"bulk_up_curry", name:"ビルドアップマメカレー", ingredients: { soy:12, soymeat:6, herb:4, egg:4 } },
@@ -310,7 +318,7 @@ const RECIPES = [
   { cat:"デザート", id:"soy_cake", name:"かるわざソイケーキ", ingredients: { egg:8, soy:7 } },
   { cat:"デザート", id:"veg_juice", name:"マイペースやさいジュース", ingredients: { tomato:9, apple:7 } },
   { cat:"デザート", id:"ginger_tea", name:"ひのこのジンジャーティー", ingredients: { ginger:9, apple:7 } },
-  { cat:"デザート", id:"sweet_potato", name:"じゅうかついスイートポテト", ingredients: { potato:9, milk:5 } },
+  { cat:"デザート", id:"sweet_potato", name:"じゅうなんスイートポテト", ingredients: { potato:9, milk:5 } },
   { cat:"デザート", id:"apple_pie", name:"ねがいごとアップルパイ", ingredients: { apple:12, milk:4 } }
 ];
 

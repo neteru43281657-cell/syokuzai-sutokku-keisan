@@ -247,7 +247,7 @@
 
   <section class="result-card">
     <div class="row" style="justify-content: space-between;">
-      <div style="font-weight:900; font-size:16px; color:var(--main);">必要合計数</div>
+      <div style="font-weight:900; font-size:16px; color:var(--main);">計算結果</div>
       <span class="badge total-badge" id="totalBadge">総合計 0個</span>
     </div>
     <div class="divider" style="background: var(--main); opacity: 0.1;"></div>
@@ -377,15 +377,15 @@ function renderGrids() {
   });
 
   document.querySelectorAll(".exChk, .repQty").forEach(input => {
-      input.oninput = (e) => {
-        if (e.target.classList.contains("repQty")) {
-          // 上限を 999 に変更
-          if (e.target.value > 999) e.target.value = 999;
-          if (e.target.value < 0) e.target.value = 0;
-        }
-        calc();
-      };
-    });
+    input.oninput = (e) => {
+      if (e.target.classList.contains("repQty")) {
+        if (e.target.value > 999) e.target.value = 999;
+        if (e.target.value < 0) e.target.value = 0;
+      }
+      calc();
+    };
+  });
+}
 
 function addRecipeRow(init) {
   if (state.recipeRows.length >= MAX_RECIPE_ROWS) return;
@@ -526,12 +526,11 @@ el("clearAll").onclick = () => {
 
 renderGrids();
 addRecipeRow({ cat: "カレー", recipeId: "avocado_gratin", meals: 0 });
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js')
+    .then(() => console.log('Service Worker Registered'));
+}
 </script>
 </body>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(() => console.log('Service Worker Registered'));
-  }
-</script>
-</html>
+</html>ml>

@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>食材ストック計算</title>
   
-  <link rel="apple-touch-icon" sizes="180x180" href="images/アイコン.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="images/アイコン.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="images/アイコン.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="images/ステージング.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/ステージング.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="images/ステージング.png">
   <link rel="manifest" href="manifest.webmanifest">
   
   <meta name="theme-color" content="#007bff">
@@ -36,14 +36,14 @@
       line-height: 1.5; 
       -webkit-font-smoothing: antialiased;
     }
-    
+
     header { 
       padding: 10px 20px; 
       background: var(--main);
       color: #fff; 
       position: sticky; 
       top: 0; 
-      z-index: 10; 
+      z-index: 100; 
       display: flex; 
       justify-content: space-between; 
       align-items: center;
@@ -52,8 +52,54 @@
     .title-text { font-weight: 800; letter-spacing: 0.03em; font-size: 18px; }
     .ver-text { font-size: 11px; font-weight: 400; opacity: 0.8; margin-top: 2px; }
 
-    main { max-width: 980px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+    main { 
+      max-width: 980px; 
+      margin: 0 auto; 
+      padding: 16px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 16px; 
+      padding-bottom: 100px; 
+    } 
+
+    .tab-content { display: none; }
+    .tab-content.active { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 16px; 
+    }
     
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 65px;
+      background: #fff;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1000;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      flex: 1;
+      padding: 8px 0;
+    }
+    .nav-item.active { color: var(--main); }
+    .nav-icon { font-size: 20px; }
+
     .card { 
       background: var(--card); 
       border: 1px solid var(--line); 
@@ -71,7 +117,6 @@
     }
 
     .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    
     .grid5 { 
       display: grid; 
       grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); 
@@ -89,36 +134,24 @@
       width: 100%; 
       background: #fff; 
       color: var(--text);
-      transition: border-color 0.2s;
     }
-    select:focus, input:focus { outline: none; border-color: var(--main); }
 
     button { 
       padding: 10px 16px; 
       border: 1px solid var(--line);
       border-radius: 10px; 
-      background: #fff; 
       font-weight: 800; 
       cursor: pointer; 
-      font-size: 14px; 
-      color: var(--text);
-      transition: all 0.2s;
+      font-size: 14px;
     }
     button.primary { background: var(--main); color: #fff; border-color: var(--main); }
-    button.primary:active { transform: scale(0.98); }
     button.danger { color: var(--danger); border-color: #fadbd8; background: #fff; }
     
-    .badge { font-size: 12px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--text); background: #f8fafc; font-weight: 700; }
-    
-    #summaryBadge {
-      background: var(--main-soft);
-      color: var(--main); 
-      border: 1px solid #cce5ff;
-    }
-
+    .badge { font-size: 12px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); font-weight: 700; }
+    #summaryBadge { background: var(--main-soft); color: var(--main); border: 1px solid #cce5ff; }
     .total-badge { background: var(--main); color: #fff; border: none; padding: 4px 16px; }
-    .divider { height: 1px; background: var(--line); margin: 16px 0; }
 
+    /* タイルと入力欄の修正 */
     .tile { 
       border: 1px solid var(--line); 
       border-radius: 12px; 
@@ -131,45 +164,47 @@
       text-align: center; 
       min-height: 95px; 
       justify-content: space-between; 
-      min-width: 0;
     }
     .icon { width: 30px; height: 30px; object-fit: contain; }
+    .tileName { font-size: 8px; font-weight: 700; width: 100%; overflow: hidden; text-overflow: clip; white-space: nowrap; }
     
-    .tileName { 
-      font-size: 8px; 
-      font-weight: 700; 
+    .chkLabel { 
+      font-size: 10px; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 3px; 
       width: 100%; 
-      white-space: nowrap; 
-      overflow: hidden; 
-      text-overflow: clip; 
-      letter-spacing: -0.05em; 
-      padding: 0 2px;
-      display: block;
+      height: 24px;      /* 獲得量ペーンの入力欄と同じ高さに固定 */
+      margin: 0;         /* 余計なマージンを排除 */
+      padding: 0 4px;    /* 左右の余白を獲得量ペーンに合わせる */
     }
-    
-    .chkLabel { display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 10px; cursor: pointer; width: 100%; font-weight: 600; }
-    .repInputRow { display: flex; align-items: center; justify-content: center; gap: 2px; width: 100%; }
-    
-    .repQty { 
-      padding: 4px 1px; 
-      font-size: 12px; 
-      text-align: center; 
-      border-radius: 8px; 
-      border: 1px solid var(--line); 
-      font-weight: 800; 
-      width: 100%; 
-      max-width: 48px; 
-      min-width: 32px;
-      appearance: textfield;
-      -moz-appearance: textfield;
-    }
-  
-    .repQty::-webkit-outer-spin-button,
-    .repQty::-webkit-inner-spin-button {
-      -webkit-appearance: none; 
+    .exChk {
       margin: 0;
+      cursor: pointer;
+      width: 13px;
+      height: 13px;
     }
-  
+
+    .repInputRow { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 2px; 
+      width: 100%; 
+      padding: 0 4px;
+    }
+    .repQty { 
+      width: 100% !important; 
+      height: 24px !important;    /* 28pxから24pxへ縮小 */
+      padding: 0 2px !important; 
+      font-size: 14px !important;  /* フォントサイズ調整 */
+      font-weight: 800 !important; 
+      text-align: center; 
+      border-radius: 6px !important; /* 角丸も少しシャープに */
+    }
+
     .recipeRow { 
       border: 1px solid var(--line); 
       background: #fcfdfe;
@@ -182,50 +217,204 @@
       margin-bottom: 12px; 
       position: relative; 
     }
-    
-    .removeBtn { 
-      position: absolute; top: -8px; 
-      right: -8px; 
-      border: 1px solid var(--line); background: #fff; color: var(--danger); 
-      font-size: 16px; 
-      width: 26px; height: 26px;
+    .removeBtn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--danger);
+      width: 26px;
+      height: 26px;
       padding: 0;
-      border-radius: 50%; 
-      display: flex; align-items: center; justify-content: center; 
-      font-weight: bold; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      line-height: 0; 
+      line-height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      cursor: pointer;
     }
+
+    .preview { font-size: 12px; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; border-top: 1px solid var(--line); padding-top: 10px; width: 100%; align-items: center; }
+    .preview span { display: flex; align-items: center; background: var(--main-soft); color: var(--main); padding: 2px 6px; border-radius: 6px; font-weight: 700; border: 1px solid #d0e7ff; }
+
+    /* カレンダー用 */
+    .calendar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+    .month-card { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 8px; font-size: 10px; }
+    .month-name { font-weight: 900; text-align: center; border-bottom: 1px solid var(--line); margin-bottom: 5px; color: var(--text); }
     
-    /* レイアウト崩れ防止のCSS */
-    .recipeCol-cat { 
-      flex: 1; 
-      min-width: 100px;
-    }
-    .recipeCol-main { 
-      flex: 2; 
-      min-width: 150px; 
-    }
-    .recipeCol-meals { 
-      width: 65px; 
-      flex-shrink: 0;
-    }
+    .days-grid { 
+      display: grid; 
+      grid-template-columns: repeat(7, 1fr); 
+      gap: 2px;           
+      align-items: center;
+      justify-items: center; }
     
-    .catSel, .recipeSel {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .day {
       width: 100%;
+      aspect-ratio: 1/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 10px;
+      position: relative;
+      border-radius: 4px; 
+      transition: background 0.2s;
+      line-height: 1;
+      padding-top: 1px;
     }
+    
+    .gsd { background-color: #add8e6; color: #000; border-radius: 4px; }
+    .nmd { background-color: #000080; color: #fff; border-radius: 4px; }
+    
+    .dow { 
+      font-size: 8px; 
+      margin-bottom: 1px; }
+    .dow:nth-child(6) { color: #007bff !important; } 
+    .dow:nth-child(7) { color: #e74c3c !important; } 
+    .day-sat { color: #007bff !important; } 
+    .day-sun { color: #e74c3c !important; } 
+    .day-holiday { color: #ff8c00 !important; font-weight: 900; }
+    
+    .day-today::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid #ff4757;
+      border-radius: 4px;
+      background-color: rgba(255, 71, 87, 0.1);
+      pointer-events: none;
+      z-index: 2; }
+    @media (max-width: 480px) { .calendar-grid { grid-template-columns: repeat(2, 1fr); } }
 
-    .preview { font-size: 12px; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; width: 100%; }
-    .preview span { display: flex; align-items: center; background: var(--main-soft); color: var(--main); padding: 3px 8px; border-radius: 8px; font-weight: 700; border: 1px solid #d0e7ff; }
-
-    @media (max-width: 480px) { 
-      .tileName { 
-        font-size: 7px; 
-        letter-spacing: -0.06em; 
-      }
-      .recipeCol-main { min-width: 120px; }
+    /* フィールドメニュー用スタイル */
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); 
+      gap: 12px;
+    }
+    .field-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      background: #fff;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .field-item:active {
+      transform: scale(0.98);
+      background: var(--main-soft);
+    }
+    .field-img {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+      margin-bottom: 8px;
+    }
+    .field-name {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text);
+    }
+/* ===== 出現ポケモン一覧（tab2 詳細） ===== */
+    .field-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .field-header img {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+    }
+    .field-title {
+      font-weight: 900;
+      font-size: 16px;
+      color: var(--text);
+    }
+    .energy-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .energy-table th, .energy-table td {
+      border: 1px solid var(--line);
+      padding: 8px;
+      text-align: center;
+    }
+    .energy-table th {
+      background: #f7f9fc;
+      font-weight: 900;
+    }
+    
+    .sleep-section {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .sleep-label {
+      padding: 10px 12px;
+      font-weight: 900;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+    .sleep-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 64px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-weight: 900;
+      font-size: 12px;
+      color: #111;
+    }
+    .badge-uto { background: #ffe66a; }
+    .badge-suya { background: #aee7f2; }
+    .badge-gusu { background: #8fb3ff; color: #0b1b3a; }
+    
+    .poke-grid {
+      padding: 10px 10px 12px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
+      gap: 8px;
+    }
+    .poke-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .poke-item img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+    }
+    .poke-name {
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.2;
+      word-break: keep-all;
     }
   </style>
 </head>
@@ -233,384 +422,143 @@
 
 <header>
   <div>
-    <div class="title-text">食材ストック計算</div>
-    <div class="ver-text">ver 1.0.2</div>
+    <div id="headerTitle" class="title-text">食材ストック計算</div>
+    <div id="headerVer" class="ver-text">ver1.0.2</div>
   </div>
-  <a href="javascript:void(0)" id="openNotice" style="color:#fff; font-size:12px; font-weight:700; text-decoration:underline;">ご利用上の注意</a>
+  <button id="openNotice" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">ⓘ</button>
 </header>
 
-<div id="noticeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center; padding:20px;">
-  <div class="card" style="max-width:400px; width:100%; position:relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-    <div style="font-weight:900; margin-bottom:12px; border-bottom:1px solid var(--line); padding-bottom:8px; color:var(--text);">ご利用上の注意</div>
-    <p style="font-size:13px; color:var(--text); line-height:1.6; margin-bottom:20px;">
-      このアプリは非公式であり、<strong>ﾈﾃﾙ.exe（@suiminloop.bsky.social）</strong>が個人で作ったものです。<br><br>
+<main>
+  <div id="tab1" class="tab-content active">
+    <section class="card">
+      <div class="row" style="justify-content: space-between; align-items: flex-start;">
+        <div>
+          <div style="font-weight:900; font-size:15px; color:var(--text); margin-bottom: 4px;">条件設定</div>
+          <span class="badge" id="summaryBadge">合計 0食 / 21食</span>
+        </div>
+        <div class="row">
+          <button id="addRecipe" class="primary">+ 追加</button>
+          <button id="clearAll" class="danger">クリア</button>
+        </div>
+      </div>
+      <div id="recipeList" style="margin-top:10px;"></div>
+    </section>
+
+    <section class="card">
+      <div style="font-weight:900; font-size:14px; margin-bottom:12px; border-left: 5px solid var(--main); padding-left: 10px; color: var(--text);">計算から除外</div>
+      <div id="excludeGrid" class="grid5"></div>
+    </section>
+
+    <section class="card">
+      <div style="font-weight:900; font-size:14px; margin-bottom:12px; border-left: 5px solid var(--main); padding-left: 10px; color: var(--text);">1日当たりの獲得量</div>
+      <div id="replenishGrid" class="grid5"></div>
+    </section>
+
+    <section class="result-card">
+      <div class="row" style="justify-content: space-between;">
+        <div style="font-weight:900; font-size:16px; color:var(--main);">計算結果</div>
+        <span class="badge total-badge" id="totalBadge">総合計 0個</span>
+      </div>
+      <div style="height:1px; background:var(--main); opacity:0.1; margin:16px 0;"></div>
+      <div id="resultGrid" class="grid5"></div>
+    </section>
+  </div>
+
+  <div id="tab2" class="tab-content">
+    <div id="fieldMenu">
+      <section class="card">
+        <div style="font-weight:900; font-size:16px; color:var(--main); margin-bottom:12px; text-align:center;">フィールドを選択</div>
+        <div class="field-grid"></div>
+      </section>
+    </div>
+    <div id="fieldDetail" style="display:none;">
+      <button onclick="backToMenu()" style="margin-bottom:10px; padding:6px 12px; background:none; border:1px solid var(--line); border-radius:8px; font-size:12px; color:var(--muted);">← 戻る</button>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <div id="tab3" class="tab-content">
+    <section class="card">
+      <div style="display: flex; gap: 10px; margin-bottom: 10px; font-size: 11px;">
+        <span style="display:flex; align-items:center; gap:4px;"><span style="width:12px; height:12px; background:#add8e6; display:inline-block; border-radius:2px;"></span>Good Sleep Day</span>
+        <span style="display:flex; align-items:center; gap:4px;"><span style="width:12px; height:12px; background:#000080; display:inline-block; border-radius:2px;"></span>New Moon Day</span>
+      </div>
+      <div id="yearCalendar" class="calendar-grid"></div>
+    </section>
+  </div>
+</main>
+
+<nav class="bottom-nav">
+  <div class="nav-item active" onclick="switchTab('tab1', this)">
+    <span class="nav-icon">🔍</span>
+    <span>食材ストック計算</span>
+  </div>
+  <div class="nav-item" onclick="switchTab('tab2', this)">
+    <span class="nav-icon">🐾</span>
+    <span>出現ポケモン一覧</span>
+  </div>
+  <div class="nav-item" onclick="switchTab('tab3', this)">
+    <span class="nav-icon">📅</span>
+    <span>月齢カレンダー</span>
+  </div>
+</nav>
+
+  
+<div id="noticeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center; padding:20px;">
+  <div class="card" style="max-width:400px; width:100%; position:relative;">
+    
+    <div style="font-weight:900; margin-bottom:12px; border-bottom:1px solid var(--line); padding-bottom:8px;">
+      ご利用上の注意
+    </div>
+
+    <!-- 本文 -->
+    <p style="font-size:13px; color:var(--text); line-height:1.6; margin-bottom:14px;">
+      このアプリは非公式であり、
+      <strong>ﾈﾃﾙ.exe（@suiminloop.bsky.social）</strong>が個人で作ったものです。<br>
       ご利用いただく際は自己責任でお願いします🙇
     </p>
+
+    <!-- 出典 -->
+    <div style="font-size:13px; color:var(--text); line-height:1.6; margin-bottom:20px;">
+      <div style="font-weight:900; margin-bottom:6px;">出典：</div>
+      <ul style="margin:0 0 0 18px; padding:0;">
+        <li>Pokémon Sleep 公式サイト</li>
+        <li>RaenonXポケスリ攻略ツール</li>
+        <li>ポケモンスリープ攻略・検証 Wiki*</li>
+      </ul>
+    </div>
+
     <button id="closeNotice" class="primary" style="width:100%;">閉じる</button>
   </div>
 </div>
 
-<main>
-  <section class="card">
-    <div class="row" style="justify-content: space-between; align-items: flex-start;">
-      <div>
-        <div style="font-weight:900; font-size:15px; color:var(--text); margin-bottom: 4px;">条件設定</div>
-        <span class="badge" id="summaryBadge">合計 0食 / 21食</span>
-      </div>
-      <div class="row">
-        <button id="addRecipe" class="primary">+ 追加</button>
-        <button id="clearAll" class="danger">クリア</button>
-      </div>
-    </div>
-    <div id="recipeList" style="margin-top:10px;"></div>
-  </section>
-
-  <section class="card">
-    <div style="font-weight:900; font-size:14px; margin-bottom:12px; border-left: 5px solid var(--main); padding-left: 10px; color: var(--text);">計算から除外</div>
-    <div id="excludeGrid" class="grid5"></div>
-  </section>
-
-  <section class="card">
-    <div style="font-weight:900; font-size:14px; margin-bottom:12px; border-left: 5px solid var(--main); padding-left: 10px; color: var(--text);">1日当たりの獲得量</div>
-    <div id="replenishGrid" class="grid5"></div>
-  </section>
-
-  <section class="result-card">
-    <div class="row" style="justify-content: space-between;">
-      <div style="font-weight:900; font-size:16px; color:var(--main);">計算結果</div>
-      <span class="badge total-badge" id="totalBadge">総合計 0個</span>
-    </div>
-    <div class="divider" style="background: var(--main); opacity: 0.1;"></div>
-    <div id="resultGrid" class="grid5"></div>
-  </section>
-</main>
 
 <script>
-const MEALS_PER_DAY = 3;
-const MAX_RECIPE_ROWS = 9;
-const MAX_TOTAL_MEALS = 21;
-
-const INGREDIENTS = [
-  { id:"leek", name:"ふといながねぎ", file:"ふといながねぎ.webp" },
-  { id:"mushroom", name:"あじわいキノコ", file:"あじわいキノコ.webp" },
-  { id:"egg", name:"とくせんエッグ", file:"とくせんエッグ.webp" },
-  { id:"potato", name:"ほっこりポテト", file:"ほっこりポテト.webp" },
-  { id:"apple", name:"とくせんリンゴ", file:"とくせんリンゴ.webp" },
-  { id:"herb", name:"げきからハーブ", file:"げきからハーブ.webp" },
-  { id:"soymeat", name:"マメミート", file:"マメミート.webp" },
-  { id:"milk", name:"モーモーミルク", file:"モーモーミルク.webp" },
-  { id:"honey", name:"あまいミツ", file:"あまいミツ.webp" },
-  { id:"oil", name:"ピュアなオイル", file:"ピュアなオイル.webp" },
-  { id:"ginger", name:"あったかジンジャー", file:"あったかジンジャー.webp" },
-  { id:"tomato", name:"あんみんトマト", file:"あんみんトマト.webp" },
-  { id:"cacao", name:"リラックスカカオ", file:"リラックスカカオ.webp" },
-  { id:"tail", name:"おいしいシッポ", file:"おいしいシッポ.webp" },
-  { id:"soy", name:"ワカクサ大豆", file:"ワカクサ大豆.webp" },
-  { id:"corn", name:"ワカクサコーン", file:"ワカクサコーン.webp" },
-  { id:"coffee", name:"めざましコーヒー", file:"めざましコーヒー.webp" },
-  { id:"pumpkin", name:"ずっしりカボチャ", file:"ずっしりカボチャ.webp" },
-  { id:"avocado", name:"つやつやアボカド", file:"つやつやアボカド.webp" }
-];
-
-const RECIPES = [
-  { cat:"カレー・シチュー", id:"avocado_gratin", name:"しんりょくアボカドグラタン", ingredients: { avocado:22, potato:20, milk:41, oil:32 } },
-  { cat:"カレー・シチュー", id:"sukiyaki_curry", name:"いあいぎりすき焼きカレー", ingredients: { leek:27, soymeat:26, honey:26, egg:22 } },
-  { cat:"カレー・シチュー", id:"awake_stew", name:"めざめるパワーシチュー", ingredients: { soy:28, tomato:25, mushroom:23, coffee:16 } },
-  { cat:"カレー・シチュー", id:"pumpkaboo_stew", name:"なりきりバケッチャシチュー", ingredients: { pumpkin:10, soymeat:16, potato:18, mushroom:25 } },
-  { cat:"カレー・シチュー", id:"keema_curry", name:"れんごくコーンキーマカレー", ingredients: { herb:27, soymeat:24, corn:14, ginger:12 } },
-  { cat:"カレー・シチュー", id:"ninja_curry", name:"ニンジャカレー", ingredients: { soy:24, soymeat:9, leek:12, mushroom:5 } },
-  { cat:"カレー・シチュー", id:"butter_curry", name:"ぜったいねむりバターカレー", ingredients: { potato:18, tomato:15, cacao:12, milk:10 } },
-  { cat:"カレー・シチュー", id:"tail_curry", name:"あぶりテールカレー", ingredients: { tail:8, herb:25 } },
-  { cat:"カレー・シチュー", id:"leek_curry", name:"からくちネギもりカレー", ingredients: { leek:14, ginger:10, herb:8 } },
-  { cat:"カレー・シチュー", id:"punch_curry", name:"ピヨピヨパンチ辛口カレー", ingredients: { coffee:11, herb:11, honey:11 } },
-  { cat:"カレー・シチュー", id:"corn_stew", name:"じゅうなんコーンシチュー", ingredients: { corn:14, milk:8, potato:8 } },
-  { cat:"カレー・シチュー", id:"parent_child_curry", name:"おやこあいカレー", ingredients: { honey:12, apple:11, egg:8, potato:4 } },
-  { cat:"カレー・シチュー", id:"mushroom_curry", name:"キノコのほうしカレー", ingredients: { mushroom:14, potato:9 } },
-  { cat:"カレー・シチュー", id:"bulk_up_curry", name:"ビルドアップマメカレー", ingredients: { soy:12, soymeat:6, herb:4, egg:4 } },
-  { cat:"カレー・シチュー", id:"white_stew", name:"ほっこりホワイトシチュー", ingredients: { milk:10, potato:8, mushroom:4 } },
-  { cat:"カレー・シチュー", id:"omurice_curry", name:"とけるオムカレー", ingredients: { egg:10, tomato:6 } },
-  { cat:"カレー・シチュー", id:"tomato_curry", name:"サンパワートマトカレー", ingredients: { tomato:10, herb:5 } },
-  { cat:"カレー・シチュー", id:"cutlet_curry", name:"ひでりカツレツカレー", ingredients: { soymeat:10, oil:5 } },
-  { cat:"カレー・シチュー", id:"cheese_hamburg_curry", name:"満腹チーズバーグカレー", ingredients: { milk:8, soymeat:8 } },
-  { cat:"サラダ", id:"guacamole_chips", name:"じならしワカモレチップス", ingredients: { avocado:28, corn:25, herb:30, soy:22 } },
-  { cat:"サラダ", id:"coffee_salad", name:"まけんきコーヒーサラダ", ingredients: { coffee:28, soymeat:28, oil:22, potato:22 } },
-  { cat:"サラダ", id:"apple_yogurt_salad", name:"りんごさんヨーグルトサラダ", ingredients: { egg:35, apple:28, tomato:23, milk:18 } },
-  { cat:"サラダ", id:"mimosa_salad", name:"はなふぶきミモザサラダ", ingredients: { egg:25, oil:17, potato:15, soymeat:12 } },
-  { cat:"サラダ", id:"ninja_salad", name:"ニンジャサラダ", ingredients: { leek:15, soy:19, mushroom:12, ginger:11 } },
-  { cat:"サラダ", id:"wakakusa_salad", name:"ワカクササラダ", ingredients: { oil:22, corn:17, tomato:14, potato:9 } },
-  { cat:"サラダ", id:"cross_chop_salad", name:"クロスチョップドサラダ", ingredients: { egg:20, soymeat:15, corn:11, tomato:10 } },
-  { cat:"サラダ", id:"tail_pepper_salad", name:"ヤドンテールのペッパーサラダ", ingredients: { tail:10, herb:10, oil:15 } },
-  { cat:"サラダ", id:"sweet_salad", name:"めいそうスイートサラダ", ingredients: { apple:21, honey:16, corn:12 } },
-  { cat:"サラダ", id:"avocado_salad", name:"くだけるアボカドサラダ", ingredients: { avocado:14, soy:18, oil:10 } },
-  { cat:"サラダ", id:"mushroom_spore_salad", name:"キノコのほうしサラダ", ingredients: { mushroom:17, tomato:8, oil:8 } },
-  { cat:"サラダ", id:"overheat_salad", name:"オーバーヒートサラダ", ingredients: { herb:17, ginger:10, tomato:8 } },
-  { cat:"サラダ", id:"gluttony_potato_salad", name:"くいしんぼうポテトサラダ", ingredients: { potato:14, egg:9, soymeat:7, apple:6 } },
-  { cat:"サラダ", id:"choco_mint_salad", name:"ムラっけチョコミントサラダ", ingredients: { cacao:14, soymeat:9 } },
-  { cat:"サラダ", id:"tofu_salad", name:"うるおいとうふサラダ", ingredients: { soy:15, tomato:9 } },
-  { cat:"サラダ", id:"wild_salad", name:"ばかぢからワイルドサラダ", ingredients: { soymeat:9, ginger:6, egg:5, potato:3 } },
-  { cat:"サラダ", id:"caprese", name:"モーモーカプレーゼ", ingredients: { milk:12, tomato:6, oil:5 } },
-  { cat:"サラダ", id:"immunity_leek_salad", name:"めんえきねぎサラダ", ingredients: { leek:10, ginger:5 } },
-  { cat:"サラダ", id:"corn_salad", name:"みだれづきコーンサラダ", ingredients: { corn:9, oil:8 } },
-  { cat:"サラダ", id:"apple_cheese_salad", name:"メロメロりんごのチーズサラダ", ingredients: { apple:15, milk:5, oil:3 } },
-  { cat:"サラダ", id:"hot_air_tofu_salad", name:"ねっぷうとうふサラダ", ingredients: { soy:10, herb:6 } },
-  { cat:"サラダ", id:"caesar_salad", name:"ゆきかきシーザーサラダ", ingredients: { milk:10, soymeat:6 } },
-  { cat:"デザート・ドリンク", id:"pancake", name:"ドキドキこわいかおパンケーキ", ingredients: { pumpkin:18, egg:24, honey:32, tomato:29 } },
-  { cat:"デザート・ドリンク", id:"eclair", name:"ドオーのエクレア", ingredients: { cacao:30, milk:26, coffee:24, honey:22 } },
-  { cat:"デザート・ドリンク", id:"cola", name:"スパイクスパイスコーラ", ingredients: { apple:35, ginger:20, leek:20, coffee:12 } },
-  { cat:"デザート・ドリンク", id:"macaron", name:"フラワーギフトマカロン", ingredients: { cacao:25, egg:25, honey:17, milk:10 } },
-  { cat:"デザート・ドリンク", id:"scone", name:"おちゃかいコーンスコーン", ingredients: { apple:20, ginger:20, corn:18, milk:9 } },
-  { cat:"デザート・ドリンク", id:"smoothie", name:"グラスミキサースムージー", ingredients: { avocado:18, tomato:16, milk:14 } },
-  { cat:"デザート・ドリンク", id:"pudding_ala_mode", name:"プリンのプリンアラモード", ingredients: { honey:20, egg:15, milk:10, apple:10 } },
-  { cat:"デザート・ドリンク", id:"tiramisu", name:"かたやぶりコーンティラミス", ingredients: { coffee:14, corn:14, milk:12 } },
-  { cat:"デザート・ドリンク", id:"coffee_jelly", name:"はやおきコーヒーゼリー", ingredients: { coffee:16, milk:14, honey:12 } },
-  { cat:"デザート・ドリンク", id:"popcorn", name:"だいばくはつポップコーン", ingredients: { corn:15, oil:14, milk:7 } },
-  { cat:"デザート・ドリンク", id:"donut", name:"ちからもちソイドーナッツ", ingredients: { oil:12, soy:16, cacao:7 } },
-  { cat:"デザート・ドリンク", id:"tea", name:"ネロリのデトックスティー", ingredients: { ginger:11, apple:15, mushroom:9 } },
-  { cat:"デザート・ドリンク", id:"cookie", name:"ふくつのジンジャークッキー", ingredients: { honey:14, ginger:12, cacao:5, egg:4 } },
-  { cat:"デザート・ドリンク", id:"fruit_ore", name:"あくまのキッスフルーツオレ", ingredients: { apple:11, milk:9, honey:7, cacao:8 } },
-  { cat:"デザート・ドリンク", id:"choco_cake", name:"あまいかおりチョコケーキ", ingredients: { honey:9, cacao:8, milk:7 } },
-  { cat:"デザート・ドリンク", id:"choco_tart", name:"はなびらのまいチョコタルト", ingredients: { cacao:11, apple:11 } },
-  { cat:"デザート・ドリンク", id:"protein_smoothie", name:"はりきりプロテインスムージー", ingredients: { soy:15, cacao:8 } },
-  { cat:"デザート・ドリンク", id:"malasada", name:"おおきいマラサダ", ingredients: { oil:10, milk:7, honey:6 } },
-  { cat:"デザート・ドリンク", id:"soy_cake", name:"かるわざソイケーキ", ingredients: { egg:8, soy:7 } },
-  { cat:"デザート・ドリンク", id:"veg_juice", name:"マイペースやさいジュース", ingredients: { tomato:9, apple:7 } },
-  { cat:"デザート・ドリンク", id:"ginger_tea", name:"ひのこのジンジャーティー", ingredients: { ginger:9, apple:7 } },
-  { cat:"デザート・ドリンク", id:"sweet_potato", name:"じゅくせいスイートポテト", ingredients: { potato:9, milk:5 } },
-  { cat:"デザート・ドリンク", id:"apple_pie", name:"ねがいごとアップルパイ", ingredients: { apple:12, milk:4 } }
-];
-
-const el = (id) => document.getElementById(id);
-let state = { recipeRows: [] };
-function getIng(id) { return INGREDIENTS.find(x => x.id === id); }
-function imgSrc(file) { return "images/" + encodeURIComponent(file); }
-
-function renderGrids() {
-  const ex = el("excludeGrid"), rep = el("replenishGrid");
-  ex.innerHTML = ""; rep.innerHTML = "";
-  INGREDIENTS.forEach(ing => {
-    ex.innerHTML += `
-      <div class="tile">
-        <div class="tileName" title="${ing.name}">${ing.name}</div>
-        <img class="icon" src="${imgSrc(ing.file)}" alt="">
-        <label class="chkLabel"><input type="checkbox" class="exChk" data-iid="${ing.id}">除外</label>
-      </div>`;
-    rep.innerHTML += `
-      <div class="tile">
-        <div class="tileName" title="${ing.name}">${ing.name}</div>
-        <img class="icon" src="${imgSrc(ing.file)}" alt="">
-        <div class="repInputRow">
-          <input type="number" class="repQty" data-iid="${ing.id}" placeholder="0">
-          <span class="suffix" style="font-size:10px;">個</span>
-        </div>
-      </div>`;
-  });
-  document.querySelectorAll(".exChk, .repQty").forEach(input => {
-    input.oninput = (e) => {
-      if (e.target.classList.contains("repQty")) {
-        if (e.target.value > 999) e.target.value = 999;
-        if (e.target.value < 0) e.target.value = 0;
-      }
-      calc();
-    };
-  });
-}
-
-function addRecipeRow(init) {
-  if (state.recipeRows.length >= MAX_RECIPE_ROWS) return;
-
-  const rowId = crypto.randomUUID();
-  const rowData = { rowId, cat: init?.cat || "カレー・シチュー", recipeId: init?.recipeId || "avocado_gratin", meals: init?.meals || 0 };
-  state.recipeRows.push(rowData);
-
-  const wrap = document.createElement("div");
-  wrap.className = "recipeRow";
-  wrap.dataset.rowId = rowId;
-  
-  wrap.innerHTML = `
-    <button class="removeBtn" title="削除">×</button>
-    <div class="recipeCol-cat">
-      <label>カテゴリー</label>
-      <select class="catSel">
-        <option value="カレー・シチュー">カレー・シチュー</option>
-        <option value="サラダ">サラダ</option>
-        <option value="デザート・ドリンク">デザート・ドリンク</option>
-      </select>
-    </div>
-    <div class="recipeCol-main">
-      <label>料理</label>
-      <select class="recipeSel"></select>
-    </div>
-    <div class="recipeCol-meals">
-      <label>食数</label>
-      <select class="mealsSel"></select>
-    </div>
-    <div class="preview"></div>`;
-
-  const cSel = wrap.querySelector(".catSel"), 
-        rSel = wrap.querySelector(".recipeSel"), 
-        mSel = wrap.querySelector(".mealsSel"), 
-        pre = wrap.querySelector(".preview");
-
-  const updateRecipeList = () => {
-    const filtered = RECIPES.filter(r => r.cat === cSel.value);
-    rSel.innerHTML = filtered.map(r => `<option value="${r.id}">${r.name}</option>`).join("");
-    
-    if (filtered.some(r => r.id === rowData.recipeId)) {
-        rSel.value = rowData.recipeId;
-    } else {
-        rowData.recipeId = rSel.value;
+(function(){
+  function box(){
+    let b=document.getElementById("bootDiag");
+    if(!b){
+      b=document.createElement("div");
+      b.id="bootDiag";
+      b.style.cssText="position:fixed;left:10px;right:10px;bottom:70px;z-index:99999;background:#fff;border:2px solid #d00;border-radius:12px;padding:10px;font-size:12px;white-space:pre-wrap;display:none";
+      document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(b));
     }
-    updatePreview();
-  };
-
-  const updatePreview = () => {
-    rowData.cat = cSel.value; 
-    rowData.recipeId = rSel.value; 
-    rowData.meals = Number(mSel.value);
-    
-    const r = RECIPES.find(x => x.id === rSel.value);
-    if (r) {
-      const totalIngredients = Object.values(r.ingredients).reduce((sum, count) => sum + count, 0);
-  
-      let html = Object.entries(r.ingredients).map(([id, q]) => {
-        const ing = getIng(id);
-        return `<span><img src="${imgSrc(ing.file)}" style="width:14px; height:14px; margin-right:4px; vertical-align:middle;">${q}</span>`;
-      }).join("");
-
-      html += `<span style="background:var(--main-soft); color:var(--main); border:1px solid #cce5ff; margin-left: auto;">${totalIngredients}個</span>`;
-      
-      pre.innerHTML = html;
-    }
-    updateAllMealDropdowns();
-    calc();
-  };
-
-  cSel.onchange = updateRecipeList;
-  rSel.onchange = updatePreview;
-  mSel.onchange = updatePreview;
-
-  wrap.querySelector(".removeBtn").onclick = () => {
-    state.recipeRows = state.recipeRows.filter(r => r.rowId !== rowId);
-    wrap.remove();
-    updateAllMealDropdowns();
-    checkAddButton();
-    calc();
-  };
-
-  cSel.value = rowData.cat;
-  updateRecipeList();
-  
-  el("recipeList").appendChild(wrap);
-  updateAllMealDropdowns();
-  checkAddButton();
-}
-
-function updateAllMealDropdowns() {
-  const currentTotal = state.recipeRows.reduce((sum, r) => sum + r.meals, 0);
-  state.recipeRows.forEach(row => {
-    const wrap = document.querySelector(`.recipeRow[data-row-id="${row.rowId}"]`);
-    if (!wrap) return;
-    const mSel = wrap.querySelector(".mealsSel");
-    const otherMeals = currentTotal - row.meals;
-    const maxAvailable = MAX_TOTAL_MEALS - otherMeals;
-    const prevVal = Number(mSel.value) || row.meals;
-    
-    mSel.innerHTML = "";
-    for (let i = 0; i <= maxAvailable; i++) {
-      const opt = document.createElement("option");
-      opt.value = i; opt.textContent = i;
-      mSel.appendChild(opt);
-    }
-    mSel.value = Math.min(prevVal, maxAvailable);
-    row.meals = Number(mSel.value);
-  });
-}
-
-function checkAddButton() { el("addRecipe").disabled = state.recipeRows.length >= MAX_RECIPE_ROWS; }
-
-function calc() {
-  const exclude = new Set([...document.querySelectorAll(".exChk:checked")].map(c => c.dataset.iid));
-  const replenishMap = new Map([...document.querySelectorAll(".repQty")].map(c => [c.dataset.iid, Number(c.value) || 0]));
-  const totalMeals = state.recipeRows.reduce((sum, r) => sum + r.meals, 0);
-  el("summaryBadge").textContent = `合計 ${totalMeals}食 / 21食`;
-  
-  const netNeed = new Map();
-  const displayOrder = [];
-  
-  state.recipeRows.forEach(row => {
-    if (row.meals <= 0) return;
-    const r = RECIPES.find(x => x.id === row.recipeId);
-    if (!r) return;
-    
-    const rowDays = row.meals / MEALS_PER_DAY;
-    
-    Object.entries(r.ingredients).forEach(([iid, qtyPerMeal]) => {
-      if (!displayOrder.includes(iid)) displayOrder.push(iid);
-      const gross = qtyPerMeal * row.meals;
-      const rowReplenish = (replenishMap.get(iid) || 0) * rowDays;
-      const currentNet = netNeed.get(iid) || 0;
-      netNeed.set(iid, currentNet + (gross - rowReplenish));
-    });
-  });
-
-  const resultGrid = el("resultGrid");
-  resultGrid.innerHTML = "";
-  let grandTotal = 0;
-
-  displayOrder.forEach(iid => {
-    if (exclude.has(iid)) return;
-    const ing = getIng(iid);
-    if (!ing) return;
-    
-    const finalNeed = Math.max(0, Math.ceil(netNeed.get(iid) || 0));
-    if (finalNeed > 0) {
-      grandTotal += finalNeed;
-      resultGrid.innerHTML += `
-        <div class="tile">
-          <div class="tileName" title="${ing.name}">${ing.name}</div>
-          <img class="icon" src="${imgSrc(ing.file)}" alt="">
-          <div class="resultQty" style="font-weight:900; color:var(--text); font-size: 13px;">${finalNeed}<span class="suffix">個</span></div>
-        </div>`;
-    }
-  });
-  el("totalBadge").textContent = `総合計 ${grandTotal}個`;
-}
-
-const modal = el("noticeModal");
-const openBtn = el("openNotice");
-const closeBtn = el("closeNotice");
-openBtn.onclick = () => { modal.style.display = "flex"; };
-closeBtn.onclick = () => { modal.style.display = "none"; };
-window.onclick = (event) => { if (event.target == modal) { modal.style.display = "none"; } };
-
-el("addRecipe").onclick = () => addRecipeRow({meals: 0});
-el("clearAll").onclick = () => { 
-  el("recipeList").innerHTML = ""; 
-  state.recipeRows = [];
-  document.querySelectorAll(".exChk").forEach(chk => chk.checked = false);
-  document.querySelectorAll(".repQty").forEach(input => input.value = "");
-  checkAddButton();
-  addRecipeRow({ cat: "カレー・シチュー", recipeId: "avocado_gratin", meals: 0 });
-  calc();
-};
-
-renderGrids();
-addRecipeRow({ cat: "カレー・シチュー", recipeId: "avocado_gratin", meals: 0 });
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./service-worker.js').then((reg) => {
-    reg.onupdatefound = () => {
-      const installingWorker = reg.installing;
-      installingWorker.onstatechange = () => {
-        if (installingWorker.state === 'installed') {
-          if (navigator.serviceWorker.controller) {
-            window.location.reload();
-          }
-        }
-      };
-    };
-  });
-}
+    return b;
+  }
+  function show(t){const b=box(); b.textContent=t; b.style.display="block";}
+  window.addEventListener("error",e=>show("[JS Error]\n"+(e.message||"")+"\n"+(e.filename||"")+":"+e.lineno+":"+e.colno));
+  window.addEventListener("unhandledrejection",e=>show("[Promise Rejection]\n"+(e.reason&& (e.reason.stack||e.reason.message))||String(e.reason)));
+  // 目印：このブロックが動いてるか
+  window.__BOOT_DIAG__ = "OK";
+})();
 </script>
+  
+<script src="data/ingredients.js"></script>
+<script src="data/recipes.js"></script>
+<script src="data/fields.js"></script>
+
+<script src="js/calendar.js"></script>
+<script src="js/pokedex.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

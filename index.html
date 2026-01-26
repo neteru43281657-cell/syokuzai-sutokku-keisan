@@ -209,6 +209,17 @@
       height: 13px;
     }
 
+    /* NCピカチュウオプション：条件列に自然に馴染ませる */
+    .ncPikaOpt{
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
     .repInputRow {
       display: flex;
       align-items: center;
@@ -373,6 +384,34 @@
       margin-bottom: 6px;
     }
 
+    /* =========================================================
+       1日当たりの獲得量：見出し行を「条件設定」と同じ列幅で揃える
+       - 左：見出し（160px）
+       - 中：NCピカ（1fr） ← ここに置くことで「モード」とX位置が揃う
+       - 右：空（160px）
+    ========================================================= */
+    .replenishHeaderRow{
+      display: grid;
+      grid-template-columns: 160px 1fr 160px;
+      gap: 12px;
+      align-items: center; /* ← start → center に変更（高さ揃え） */
+    }
+    
+    /* スマホ時：条件設定と同じく 140px / 1fr に */
+    @media (max-width: 520px){
+      .replenishHeaderRow{
+        grid-template-columns: 140px 1fr;
+      }
+    }
+    
+    .ncPikaOpt{
+      justify-content: flex-start !important;
+      height: auto !important;
+      padding: 0 !important;
+      /* 視覚的ベースライン補正 */
+      transform: translateY(-6px);
+    }
+    
     /* 条件設定ヘッダー（cond / mode / actions）共通 */
     .settingsHeaderRow{
       display:grid;
@@ -406,17 +445,39 @@
       margin-bottom: 2px;
     }
     .modeLabel{
-      display:flex;
-      align-items:center;
+      display: flex;
+      align-items: center;
       gap: 8px;
-      font-size: 13px;
-      color: var(--text);
+      line-height: 1.4;
     }
     .modeLabel input[type="radio"]{
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #3b82f6; /* 青 */
+      border-radius: 50%;
+      display: inline-grid;
+      place-content: center;
       margin: 0;
-      transform: translateY(1px);
+      transform: translateY(-1px); /* ← ラジオボタンの位置調整 */
     }
 
+    .modeLabel input[type="radio"]::before{
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      transform: scale(0);
+      transition: transform 0.1s ease-in-out;
+      background-color: #3b82f6;
+    }
+    
+    .modeLabel input[type="radio"]:checked::before{
+      transform: scale(1);
+    }
+
+    
     /* action buttons：21食/21食バッジと“同じ系統”のサイズ感 */
     #actionBlock > button{
       width: auto !important;
@@ -464,9 +525,16 @@
           "cond  mode"
           "actions mode";
       }
-      #modeBlock{ padding-left: 24px; }
+      #modeBlock{ padding-left: 8px; } 
       #actionBlock{ width: 140px; }
+      
+      /* モード文言：スマホでは1行固定にする */
+      .modeLabel{
+        white-space: nowrap;          /* 折り返し禁止 */
+        font-size: 12px;              /* ②③が2行になるのを防ぐため少し小さく */
+      }
 
+      
       /* スマホは少しだけ押しやすく */
       #actionBlock > button{
         height: 36px !important;
@@ -624,19 +692,28 @@
     </section>
 
     <section class="card">
-      <div class="row" style="margin-bottom:12px;">
-        <div class="sectionTitle" style="margin-bottom:0;">1日当たりの獲得量</div>
-
-        <div style="flex:1; display:flex; justify-content:center;">
-          <label class="chkLabel" style="font-size:12px; width:auto; height:auto; justify-content:flex-start;">
+      <div class="replenishHeaderRow">
+        <!-- 左：見出し -->
+        <div>
+          <div class="sectionTitle">1日当たりの獲得量</div>
+        </div>
+    
+        <!-- 中：NCピカ（「モード」列と同じX位置に揃う） -->
+        <div>
+          <label class="chkLabel ncPikaOpt">
             <input type="checkbox" id="optNcPika">
-            NCピカチュウ獲得分を差し引く
+            NCピカチュウの獲得分を差し引く
           </label>
         </div>
+    
+        <!-- 右：空（PCのみ。スマホではgridが2列になるので自然に無視されます） -->
+        <div></div>
       </div>
-
+    
       <div id="replenishGrid" class="grid5"></div>
     </section>
+
+
 
     <!-- ✅ 計算結果：HTML構造を正常化（枠ズレ/下寄り/注意書き消え対策） -->
     <section class="result-card">

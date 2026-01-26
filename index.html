@@ -535,15 +535,22 @@
       }
 
       
-      /* スマホは少しだけ押しやすく */
+    /* スマホ：n食/n食（badge）に寄せたサイズへ。2ボタンを完全に同寸化 */
       #actionBlock > button{
-        height: 36px !important;
-        line-height: 36px !important;
-        padding: 0 26px !important;
-        font-size: 13px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+      
+        height: 30px !important;
+        padding: 0 20px !important;
+        font-size: 12px !important;
+        line-height: 1 !important;
+        border-radius: 999px !important;
+      
+        min-width: 90px !important;
       }
-      .mode3Note{ font-size: 10px; }
-    }
+
 
     /* =========================================================
        PC見栄え：計算結果カードをまとめて整える（他には影響しない）

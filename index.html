@@ -152,6 +152,31 @@
       background: #fff;
       box-shadow: 0 6px 14px rgba(0,0,0,.08);
     }
+
+    /* =========================================================
+       モード②：2行目以降の「カテゴリは変更できません」を見た目で伝える
+    ========================================================= */
+    .recipeRow.catLocked .catSel{
+      background: #f3f6fa !important;
+      border-color: #e3eaf2 !important;
+      color: #8a97a6 !important;
+      box-shadow: none !important;
+    }
+    
+    .recipeRow.catLocked .catSel.emphSelect{
+      border: 1px solid #e3eaf2 !important;
+      box-shadow: none !important;
+      font-weight: 400 !important;
+    }
+
+    select:disabled{
+      background: #f3f6fa !important;   /* ← catLocked と同じ */
+      border-color: #e3eaf2 !important;
+      color: #8a97a6 !important;
+      box-shadow: none !important;
+      font-weight: 400 !important;      /* 通常の字体 */
+      opacity: 1 !important;            /* ブラウザ既定の薄さを無効化 */
+    }
     
     label.emphLabel{
       font-weight: 900;

@@ -263,16 +263,26 @@ function setMode(mode) {
   if (state.mode === MODES.ONE) {
     addRecipeRow({
       cat: "カレー・シチュー",
-      recipeId: getFirstRecipeIdByCat("カレー・シチュー"),
+      
       meals: WEEK_MEALS,
     });
   } else if (state.mode === MODES.MIX) {
+    const cat = "カレー・シチュー";
+    const rid = getFirstRecipeIdByCat(cat);
+
+    // 初期2行：両方 0食（自由配分）
     addRecipeRow({
-      cat: "カレー・シチュー",
-      recipeId: getFirstRecipeIdByCat("カレー・シチュー"),
+      cat,
+      recipeId: rid,
+      meals: 0,
+    });
+    addRecipeRow({
+      cat,
+      recipeId: rid,
       meals: 0,
     });
   } else if (state.mode === MODES.PRESET63) {
+
     CATS_3.forEach((cat) => {
       addRecipeRow({
         cat,
@@ -338,7 +348,7 @@ function rebuildRecipeRowsForMode() {
     const cat = "カレー・シチュー";
     const rid = getFirstRecipeIdByCat(cat);
 
-    // 初期2行（最後の行で残りを自動調整）
+    // 初期2行：両方 0食（自動調整はしない）
     addRecipeRow({
       cat,
       recipeId: rid,
@@ -355,7 +365,11 @@ function rebuildRecipeRowsForMode() {
       showRemove: true,
       showMeals: true,
     });
-    applyAutoAdjustFlagAndBalance();
+
+    state.recipeRows.forEach((r) => (r.autoAdjust = false));
+    document
+      .querySelectorAll("#recipeList .recipeRow .mealsSel")
+      .forEach((sel) => (sel.disabled = false));
   } else if (state.mode === MODES.PRESET63) {
     CATS_3.forEach((cat) => {
       addRecipeRow({
@@ -460,7 +474,11 @@ function addRecipeRow(init) {
   // ②：先頭行だけ変更OK、2行目以降は選択不可（先頭に追従）
   // ③：カテゴリ固定（選択不可）
   const rowIndex = state.recipeRows.findIndex((r) => r.rowId === rowId);
-
+  if (state.mode === MODES.MIX && rowIndex !== 0) {
+    wrap.classList.add("catLocked");
+  } else {
+    wrap.classList.remove("catLocked");
+  }
   if (state.mode === MODES.PRESET63) {
     cSel.disabled = true;
   } else if (state.mode === MODES.MIX) {
@@ -541,25 +559,49 @@ function addRecipeRow(init) {
     // ②：先頭行でカテゴリ変更したら、他行は追従＆料理もカテゴリ先頭に寄せる
     if (state.mode === MODES.MIX) {
       const headCat = cSel.value;
+
+      // まず全行：カテゴリ追従
       state.recipeRows.forEach((rr) => (rr.cat = headCat));
-      // 他行：cat固定＆recipeをカテゴリ先頭に寄せる
+
+      // カテゴリ変更時：食数は全行リセット（引き継がない）
+      state.recipeRows.forEach((rr) => (rr.meals = 0));
+
+      // 行ごとにUI反映（2行目以降：cat固定＆recipe先頭に寄せる＆meals=0反映）
       state.recipeRows.forEach((rr, idx) => {
-        if (idx === 0) return;
-        rr.recipeId = getFirstRecipeIdByCat(headCat);
         const w = document.querySelector(`.recipeRow[data-row-id="${rr.rowId}"]`);
         if (!w) return;
+
         const cs = w.querySelector(".catSel");
         const rs = w.querySelector(".recipeSel");
-        if (cs) cs.value = headCat;
+        const ms = w.querySelector(".mealsSel");
+
+        if (cs) {
+          cs.value = headCat;
+          cs.disabled = idx !== 0; // 先頭以外はロック
+        }
+
+        // 先頭以外の料理はカテゴリ先頭へ
+        if (idx !== 0) {
+          rr.recipeId = getFirstRecipeIdByCat(headCat);
+        }
+
         if (rs) {
           const filtered = RECIPES.filter((x) => x.cat === headCat);
-          rs.innerHTML = filtered.map((x) => `<option value="${x.id}">${x.name}</option>`).join("");
+          rs.innerHTML = filtered
+            .map((x) => `<option value="${x.id}">${x.name}</option>`)
+            .join("");
           rs.value = rr.recipeId;
         }
+
+        // meals UIを即時0に（選択肢の整合は updateAllMealDropdowns で確定）
+        if (ms) ms.value = "0";
       });
     }
+
+    // 先頭行の料理リスト更新（この中でupdatePreview→updateAllMealDropdowns→calcまで走る）
     updateRecipeList();
   };
+
 
   rSel.onchange = updatePreview;
   mSel.onchange = updatePreview;

@@ -117,6 +117,9 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.02);
     }
 
+    /* タブ③：スマホで横にはみ出すのを防ぐ */
+    #levelCard{ overflow-x: hidden; }
+
     .result-card {
       border: 2px solid var(--main);
       background: #ffffff;
@@ -151,6 +154,31 @@
       border: 2px solid var(--main);
       background: #fff;
       box-shadow: 0 6px 14px rgba(0,0,0,.08);
+    }
+
+    /* =========================================================
+       モード②：2行目以降の「カテゴリは変更できません」を見た目で伝える
+    ========================================================= */
+    .recipeRow.catLocked .catSel{
+      background: #f3f6fa !important;
+      border-color: #e3eaf2 !important;
+      color: #8a97a6 !important;
+      box-shadow: none !important;
+    }
+    
+    .recipeRow.catLocked .catSel.emphSelect{
+      border: 1px solid #e3eaf2 !important;
+      box-shadow: none !important;
+      font-weight: 400 !important;
+    }
+
+    select:disabled{
+      background: #f3f6fa !important;   /* ← catLocked と同じ */
+      border-color: #e3eaf2 !important;
+      color: #8a97a6 !important;
+      box-shadow: none !important;
+      font-weight: 400 !important;      /* 通常の字体 */
+      opacity: 1 !important;            /* ブラウザ既定の薄さを無効化 */
     }
     
     label.emphLabel{
@@ -533,23 +561,24 @@
         white-space: nowrap;          /* 折り返し禁止 */
         font-size: 12px;              /* ②③が2行になるのを防ぐため少し小さく */
       }
-
-      
-    /* スマホ：n食/n食（badge）に寄せたサイズへ。2ボタンを完全に同寸化 */
+    
+      /* スマホ：n食/n食（badge）に寄せたサイズへ。2ボタンを完全に同寸化 */
       #actionBlock > button{
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
         box-sizing: border-box !important;
-      
+    
         height: 30px !important;
         padding: 0 20px !important;
         font-size: 12px !important;
         line-height: 1 !important;
         border-radius: 999px !important;
-      
+    
         min-width: 90px !important;
       }
+    }
+    
 
 
     /* =========================================================
@@ -628,8 +657,124 @@
     margin-top: 10px;
   }
 
-    
-  </style>
+  /* =========================
+     経験値シミュレータ―（tab3）
+  ========================= */
+
+  /* タブ3専用のクリーンなスタイル定義 */
+  /* --- タブ3 最終調整版 (常時表示対応) --- */
+  #tab3 .lvlForm { display: flex; flex-direction: column; gap: 16px; font-family: inherit; }
+  #tab3 .lvlGroup { display: flex; flex-direction: column; gap: 14px; }
+  #tab3 .lvlDivider { height: 1px; background: var(--line); margin: 4px 0; opacity: 0.6; }
+
+  #tab3 .lvlLabel { font-weight: 900; font-size: 14px; color: var(--text); flex: 1; }
+  #tab3 .lvlReq { color: var(--danger); margin-right: 4px; }
+
+  /* 入力欄とクイックボタンの配置 */
+  #tab3 .lvlRow { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  #tab3 .lvlRowTop { align-items: flex-start !important; padding-top: 4px; }
+  #tab3 .lvlRight { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+
+/* クイックボタン：横1列（6列）表示設定 */
+  #tab3 .lvlGrid6 {
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 4px !important;
+    justify-content: flex-end !important;
+    width: 100% !important;
+    max-width: 250px;
+    margin-top: 4px;
+  }
+
+  #tab3 .lvlQuickBtn {
+    width: auto !important;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid var(--line) !important;
+    background: #fff !important;
+    font-size: 10px; /* 6個並ぶので少し小さめに設定 */
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted) !important;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  /* 入力欄：中央揃え、太字、プレースホルダー調整 */
+  #tab3 input[type="number"] {
+    -moz-appearance: textfield;
+    line-height: normal !important;
+    vertical-align: middle;
+    text-align: center;
+    font-weight: 900;
+  }
+  #tab3 input[type="number"]::-webkit-outer-spin-button,
+  #tab3 input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  #tab3 input::placeholder { color: #d1d5db; opacity: 1; font-size: 11px; text-align: center; font-weight: 900; }
+
+  /* ラジオボタンの間隔と1pxの調整 */
+  #tab3 .lvlRadio input[type="radio"] {
+    margin: 0;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+  #tab3 .lvlRadio span { vertical-align: middle; margin-left: 8px; font-weight: 900; }
+
+  /* 性格・タイプ用の縦並び */
+  #tab3 .lvlRowStack { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
+  #tab3 .lvlRadios { display: flex; gap: 12px; justify-content: flex-end; }
+  #tab3 .lvlRowStack .lvlRadios { justify-content: flex-start; padding-left: 4px; }
+  #tab3 .lvlRadio { font-size: 12px; cursor: pointer; color: var(--text); }
+
+  /* ブースト行 */
+  #tab3 .lvlBoostRow { display: grid; grid-template-columns: 1fr auto; align-items: center; row-gap: 8px; }
+  #tab3 .lvlBoostRow .lvlBoostRadios { grid-column: 1 / -1; display: flex; gap: 16px; justify-content: flex-start; padding-left: 4px; }
+
+  /* 入力欄サイズ */
+  #tab3 .lvlInputWrapper { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
+  #tab3 .lvlInMain { width: 50px; }
+  #tab3 .lvlInSub { width: 65px; }
+  #tab3 .lvlInMini { width: 50px; }
+  #tab3 .lvlUnit { font-size: 11px; font-weight: 900; white-space: nowrap; }
+
+  /* オプションラベルと睡眠の高さ合わせ */
+  #tab3 .lvlOptGroup .lvlRow { align-items: flex-start; }
+  #tab3 .lvlOptGroup .lvlLabel { margin-top: 8px; }
+  #tab3 .lvlOptItems { display: flex; flex-direction: column; gap: 10px; flex: 1.5; }
+  #tab3 .lvlOptLine { display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
+  #tab3 .lvlOptName { font-size: 12px; font-weight: 900; color: var(--muted); }
+
+  /* 計算結果と×ボタン (display: blockで常時表示) */
+  #tab3 .lvlResult { margin-top: 12px; border: 2px solid var(--main); background: #ffffff; border-radius: 16px; padding: 16px; display: block; position: relative; min-height: 60px; }
+  #tab3 .lvResTitle { font-weight: 900; font-size: 16px; color: var(--main); margin-bottom: 12px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+  #tab3 .lvResRow { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+  #tab3 .lvResKey { font-weight: 900; font-size: 13px; color: var(--muted); }
+  #tab3 .lvResVal { font-weight: 900; font-size: 14px; }
+  #tab3 .lvResSubTitle {
+    margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line);
+    width: 100%; display: block; font-weight: 900; font-size: 13px; color: var(--main);
+  }
+  #tab3 .lvResultClose {
+    position: absolute; top: -8px; right: -8px; border: 1px solid var(--line); background: #fff;
+    color: var(--danger); width: 26px; height: 26px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; z-index: 10;
+  }
+
+  @media (max-width: 520px) {
+    #tab3 .lvlLabel { font-size: 13px; }
+    #tab3 .lvlRight { gap: 6px; }
+    #tab3 .lvlQuickBtn { width: 34px; font-size: 10px; }
+    #tab3 .lvlRadio { font-size: 11px; }
+  }
+
+</style>
 </head>
 
 <body>
@@ -637,13 +782,13 @@
 <header>
   <div>
     <div id="headerTitle" class="title-text">食材ストック計算</div>
-    <div id="headerVer" class="ver-text">ver1.0.4</div>
+    <div id="headerVer" class="ver-text">ver1.0.5</div>
   </div>
 
   <div style="display:flex; align-items:center; gap:10px;">
     <button id="openDocs"
       style="background:none; border:none; color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px; padding:6px 8px;">
-      <span style="font-size:18px; line-height:1;">📚</span>
+      <span style="font-size:18px; line-height:1;">📖</span>
       <span style="font-size:12px; font-weight:800;">お役立ち資料集</span>
     </button>
 
@@ -668,12 +813,12 @@
 
             <label class="modeLabel">
               <input type="radio" name="calcMode" id="calcMode1" value="mode1">
-              <span>① 同じレシピを21食作り続ける</span>
+              <span>① 同じレシピだけ作る</span>
             </label>
 
             <label class="modeLabel">
               <input type="radio" name="calcMode" id="calcMode2" value="mode2">
-              <span>② 2種以上のレシピを組み合わせて21食作る</span>
+              <span>② 2種以上のレシピを組み合わせる</span>
             </label>
 
             <label class="modeLabel">
@@ -738,10 +883,11 @@
     </section>
   </div>
 
+
+  
   <div id="tab2" class="tab-content">
     <div id="fieldMenu">
       <section class="card">
-        <div style="font-weight:900; font-size:16px; color:var(--main); margin-bottom:12px; text-align:center;">フィールドを選択</div>
         <div class="field-grid"></div>
       </section>
     </div>
@@ -751,7 +897,145 @@
     </div>
   </div>
 
+
+  
   <div id="tab3" class="tab-content">
+    <section class="card" id="levelCard">
+      <div class="lvlForm">
+        
+        <div class="lvlGroup">
+          <div class="lvlRow lvlRowTop">
+            <div class="lvlLabel"><span class="lvlReq">*</span> 今のレベル</div>
+            <div class="lvlRight">
+              <div class="lvlInputWrapper">
+                <input id="lvNow" class="lvlInMain" type="number" placeholder="xx" inputmode="numeric">
+                <span class="lvlUnit">レベル</span>
+              </div>
+              <div class="lvlQuick" style="display: flex; gap: 4px; justify-content: flex-end; width: 100%; margin-top: 4px;">
+                <button type="button" class="lvlQuickBtn" data-now="25" style="flex: 1; min-width: 40px;">25</button>
+                <button type="button" class="lvlQuickBtn" data-now="30" style="flex: 1; min-width: 40px;">30</button>
+                <button type="button" class="lvlQuickBtn" data-now="50" style="flex: 1; min-width: 40px;">50</button>
+                <button type="button" class="lvlQuickBtn" data-now="55" style="flex: 1; min-width: 40px;">55</button>
+                <button type="button" class="lvlQuickBtn" data-now="60" style="flex: 1; min-width: 40px;">60</button>
+                <div style="flex: 1; min-width: 40px;"></div>
+              </div>
+            </div>
+          </div>
+  
+          <div class="lvlRow lvlRowTop">
+            <div class="lvlLabel"><span class="lvlReq">*</span> 目標のレベル</div>
+            <div class="lvlRight">
+              <div class="lvlInputWrapper">
+                <input id="lvTarget" class="lvlInMain" type="number" placeholder="xx" inputmode="numeric">
+                <span class="lvlUnit">レベル</span>
+              </div>
+              <div class="lvlQuick" style="display: flex; gap: 4px; justify-content: flex-end; width: 100%; margin-top: 4px;">
+                <button type="button" class="lvlQuickBtn" data-target="25" style="flex: 1; min-width: 40px;">25</button>
+                <button type="button" class="lvlQuickBtn" data-target="30" style="flex: 1; min-width: 40px;">30</button>
+                <button type="button" class="lvlQuickBtn" data-target="50" style="flex: 1; min-width: 40px;">50</button>
+                <button type="button" class="lvlQuickBtn" data-target="55" style="flex: 1; min-width: 40px;">55</button>
+                <button type="button" class="lvlQuickBtn" data-target="60" style="flex: 1; min-width: 40px;">60</button>
+                <button type="button" class="lvlQuickBtn" data-target="65" style="flex: 1; min-width: 40px;">65</button>
+              </div>
+            </div>
+          </div>
+    
+            <div class="lvlRowStack">
+              <div class="lvlLabel"><span class="lvlReq">*</span> 性格</div>
+              <div class="lvlRadios">
+                <label class="lvlRadio"><input type="radio" name="lvNature" value="none" checked><span>無補正</span></label>
+                <label class="lvlRadio"><input type="radio" name="lvNature" value="up"><span>EXP↑</span></label>
+                <label class="lvlRadio"><input type="radio" name="lvNature" value="down"><span>EXP↓</span></label>
+              </div>
+            </div>
+    
+            <div class="lvlRowStack">
+              <div class="lvlLabel"><span class="lvlReq">*</span> 経験値タイプ</div>
+              <div class="lvlRadios">
+                <label class="lvlRadio"><input type="radio" name="lvType" value="normal" checked><span>ふつう</span></label>
+                <label class="lvlRadio"><input type="radio" name="lvType" value="600"><span>600族</span></label>
+                <label class="lvlRadio"><input type="radio" name="lvType" value="semi"><span>準伝説</span></label>
+                <label class="lvlRadio"><input type="radio" name="lvType" value="legend"><span>伝説 / 幻</span></label>
+              </div>
+            </div>
+          </div>
+    
+          <div class="lvlDivider"></div>
+    
+          <div class="lvlGroup">
+            <div class="lvlRow">
+              <div class="lvlLabel">次のレベルまでの経験値</div>
+              <div class="lvlInputWrapper">
+                <input id="lvProgressExp" class="lvlInSub" type="number" placeholder="xxxx">
+                <span class="lvlUnit">pt</span>
+              </div>
+            </div>
+            
+          <!-- ▼ここから非表示（将来戻したいのでHTMLだけコメントアウト） -->
+          <!--
+          <div class="lvlRow">
+            <div class="lvlLabel">ポケモンのアメ所持数</div>
+            <div class="lvlInputWrapper">
+              <input id="lvCandyOwned" class="lvlInSub" type="number" placeholder="xxxx">
+              <span class="lvlUnit">個</span>
+            </div>
+          </div>
+          -->
+          <!-- ▲ここまで非表示 -->
+            
+            <div class="lvlRow lvlBoostRow">
+              <div class="lvlLabel">ブースト</div>
+              <div class="lvlInputWrapper">
+                <input id="lvBoostCount" class="lvlInSub" type="number" placeholder="xxxx">
+                <span class="lvlUnit">個</span>
+              </div>
+              <div class="lvlBoostRadios">
+                <label class="lvlRadio"><input type="radio" name="lvBoostKind" value="full"><span>アメブースト</span></label>
+                <label class="lvlRadio"><input type="radio" name="lvBoostKind" value="mini"><span>ミニアメブースト</span></label>
+              </div>
+            </div>
+          </div>
+    
+          <div class="lvlDivider"></div>
+    
+          <div class="lvlGroup lvlOptGroup">
+            <div class="lvlRow">
+              <div class="lvlLabel">オプション</div>
+              <div class="lvlOptItems">
+                <div class="lvlOptLine">
+                  <span class="lvlOptName">睡眠</span>
+                  <div class="lvlInputWrapper">
+                    <input id="lvSleepDays" class="lvlInMini" type="number" placeholder="xxx">
+                    <span class="lvlUnit">日</span>
+                  </div>
+                </div>
+                <div class="lvlOptLine">
+                  <span class="lvlOptName">睡眠EXPボーナス</span>
+                  <div class="lvlInputWrapper">
+                    <input id="lvSleepBonus" class="lvlInMini" type="number" placeholder="x">
+                    <span class="lvlUnit">体</span>
+                  </div>
+                </div>
+                <div class="lvlOptLine">
+                  <span class="lvlOptName">せいちょうのおこう</span>
+                  <div class="lvlInputWrapper">
+                    <input id="lvGrowthIncense" class="lvlInMini" type="number" placeholder="xxx">
+                    <span class="lvlUnit">個</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="lvResult" class="lvlResult">
+            <div id="lvResultClear" class="lvResultClose">×</div>
+            <div class="lvResTitle">計算結果</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+  <div id="tab4" class="tab-content">
     <section class="card">
       <div style="display: flex; gap: 10px; margin-bottom: 10px; font-size: 11px;">
         <span style="display:flex; align-items:center; gap:4px;"><span style="width:12px; height:12px; background:#add8e6; display:inline-block; border-radius:2px;"></span>Good Sleep Day</span>
@@ -764,18 +1048,26 @@
 
 <nav class="bottom-nav">
   <div class="nav-item active" onclick="switchTab('tab1', this)">
-    <span class="nav-icon">🔍</span>
+    <span class="nav-icon">🍎</span>
     <span>食材ストック計算</span>
   </div>
+
   <div class="nav-item" onclick="switchTab('tab2', this)">
     <span class="nav-icon">🐾</span>
     <span>出現ポケモン一覧</span>
   </div>
+
   <div class="nav-item" onclick="switchTab('tab3', this)">
-    <span class="nav-icon">📅</span>
+    <span class="nav-icon">🔍</span>
+    <span>経験値シミュレータ―</span>
+  </div>
+
+  <div class="nav-item" onclick="switchTab('tab4', this)">
+    <span class="nav-icon">🌙</span>
     <span>月齢カレンダー</span>
   </div>
 </nav>
+
 
 <!-- お役立ち資料集モーダル -->
 <div id="docsModal"
@@ -784,7 +1076,7 @@
   <div class="card" style="max-width:520px; width:100%; position:relative;">
 
     <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:12px;">
-      <div style="font-weight:900;">📚 お役立ち資料集</div>
+      <div style="font-weight:900;">📖 お役立ち資料集</div>
       <button id="closeDocs"
         style="background:none; border:1px solid var(--line); border-radius:10px; padding:6px 10px; font-weight:800; cursor:pointer;">
         閉じる
@@ -881,6 +1173,7 @@
 <script src="data/ingredients.js"></script>
 <script src="data/recipes.js"></script>
 <script src="data/fields.js"></script>
+<script src="js/level.js"></script>
 <script src="js/calendar.js"></script>
 <script src="js/pokedex.js"></script>
 <script src="js/app.js"></script>

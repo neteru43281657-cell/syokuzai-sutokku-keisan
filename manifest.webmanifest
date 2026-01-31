@@ -7,10 +7,16 @@
   "theme_color": "#007bff",
   "icons": [
     {
-      "src": "images/アイコン.png",
+      "src": "images/アイコン_ios.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "images/アイコン_maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

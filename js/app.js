@@ -1171,32 +1171,25 @@ window.onload = () => {
 
 
 
-  // クリア
+   // クリア
   const clearBtn = el("clearAll");
   if (clearBtn) {
     clearBtn.onclick = () => {
+      // --- タブ1の項目のみをリセット ---
       const list = el("recipeList");
       if (list) list.innerHTML = "";
       state.recipeRows = [];
 
+      // 除外チェックと獲得量の入力を空にする
       document.querySelectorAll(".exChk").forEach((chk) => (chk.checked = false));
       document.querySelectorAll(".repQty").forEach((input) => (input.value = ""));
 
-      // モードは初期に戻す
-      state.mode = MODES.ONE;
-
-      // 初期行を作る（前半の setMode などがある想定）
-      if (typeof setMode === "function") {
-        setMode(MODES.ONE);
-      } else {
-        // フォールバック：とりあえず1行作る
-        addRecipeRow({ meals: WEEK_MEALS });
-        updateAllMealDropdowns();
-        calc();
-      }
+      // モードを初期（①）に戻して再構築
+      setMode(MODES.ONE);
     };
   }
 
+   
   // 初期行がなければ1行追加（前半でモード初期化済み前提）
   if (state.recipeRows.length === 0) {
     if (typeof setMode === "function") {
@@ -1266,7 +1259,7 @@ window.switchTab = function (tabId, clickedEl) {
   if (headerTitle) {
     headerTitle.textContent =
       tabId === "tab2" ? "出現ポケモン一覧" :
-      tabId === "tab3" ? "経験値シミュレーター" :
+      tabId === "tab3" ? "レベルシミュレーター" :
       tabId === "tab4" ? "月齢カレンダー" :
       "食材ストック計算";
   }

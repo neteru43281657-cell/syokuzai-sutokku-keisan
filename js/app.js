@@ -1266,7 +1266,7 @@ window.switchTab = function (tabId, clickedEl) {
   if (headerTitle) {
     headerTitle.textContent =
       tabId === "tab2" ? "出現ポケモン一覧" :
-      tabId === "tab3" ? "レベルシミュレーター" :
+      tabId === "tab3" ? "経験値シミュレーター" :
       tabId === "tab4" ? "月齢カレンダー" :
       "食材ストック計算";
   }

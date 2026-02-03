@@ -788,6 +788,27 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; z-index: 10;
   }
 
+    /* 小さなインフォメーションボタン（記号版） */
+    .info-btn-tiny {
+      display: inline-block;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 400;
+      cursor: pointer;
+      margin-left: 2px;
+      margin-right: 6px;
+      vertical-align: middle;
+      line-height: 1;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    
+    /* 押したとき */
+    .info-btn-tiny:active {
+      opacity: 1.0;
+      transform: scale(0.95);
+    }
+
   @media (max-width: 520px) {
     #tab3 .lvlLabel { font-size: 13px; }
     #tab3 .lvlRight { gap: 6px; }
@@ -1017,16 +1038,19 @@
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 2px; align-items: flex-start; width: fit-content; margin-left: auto;">
                   <div class="lvlOptLine" style="width: 100%; margin: 0; padding: 0;">
-                    <span class="lvlOptName" style="margin-right: 8px;">せいちょうのおこう</span>
+                    <span class="lvlOptName">せいちょうのおこう</span>
+                    <span class="info-btn-tiny" onclick="showInfo('最高効率で自動配分されます')">ⓘ</span>
                     <div class="lvlInputWrapper">
                       <input id="lvGrowthIncense" class="lvlInMini" type="number" placeholder="xxx">
                       <span class="lvlUnit">個</span>
                     </div>
                   </div>
                 </div>
+                
                 <div style="display: flex; flex-direction: column; gap: 2px; align-items: flex-start; width: fit-content; margin-left: auto; margin-top: 4px;">
                   <div class="lvlOptLine" style="width: 100%; margin: 0; padding: 0;">
-                    <span class="lvlOptName" style="margin-right: 8px;">グッドスリープデー</span>
+                    <span class="lvlOptName">グッドスリープデー</span>
+                    <span class="info-btn-tiny" onclick="showInfo('通しの3日間で1回扱いです')">ⓘ</span>
                     <div class="lvlInputWrapper">
                       <input id="lvGSD" class="lvlInMini" type="number" placeholder="xx">
                       <span class="lvlUnit">回</span>
@@ -1213,6 +1237,16 @@
 </div>
 
 
+<div id="simpleModal"
+  style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+         background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+  <div class="card" style="max-width:320px; width:100%; text-align:center; padding:20px;">
+    <div id="simpleModalMsg" style="font-size:13px; color:var(--text); line-height:1.6; font-weight:700; margin-bottom:20px;">
+    </div>
+    <button onclick="document.getElementById('simpleModal').style.display='none'" class="primary" style="width:100%;">閉じる</button>
+  </div>
+</div>
+  
 
 <!-- JS 読み込み（あなたの構成に合わせて） -->
 <script src="data/ingredients.js"></script>

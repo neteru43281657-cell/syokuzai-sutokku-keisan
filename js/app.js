@@ -321,7 +321,19 @@ function addRecipeRow(init) {
   };
 
   cSel.onchange = updateRecipeList;
-  rSel.onchange = updatePreview;
+  
+  // ★GAイベント追加：料理を選んだ瞬間に送信
+  rSel.onchange = () => {
+    const selectedText = rSel.options[rSel.selectedIndex]?.text || rSel.value;
+    if (typeof gtag === 'function') {
+      gtag('event', 'select_recipe', {
+        'recipe_name': selectedText,
+        'category': cSel.value
+      });
+    }
+    updatePreview();
+  };
+
   mSel.onchange = () => {
     rowData.meals = Number(mSel.value);
     refreshAllMealDropdowns(); 
@@ -508,6 +520,13 @@ window.onload = () => {
 };
 
 window.switchTab = function (tabId, clickedEl) {
+  // ★GAイベント追加：タブを開いた回数を計測
+  if (typeof gtag === 'function') {
+    gtag('event', 'tab_view', {
+      'tab_name': tabId
+    });
+  }
+
   document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
   el(tabId)?.classList.add("active");
 

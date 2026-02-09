@@ -223,13 +223,30 @@ function toNum(v) {
 
     const ownedCandy = toNum(el("lvOwnedCandy").value);
 
+    // ★修正：再描画する前に、現在の「備考」が開いているかチェックして記憶しておく
+    const currentDetails = container.querySelector("details");
+    const isDetailsOpen = currentDetails && currentDetails.open;
+
     const resNormal = simulate({ lvNow, lvTarget, typeKey: type, natureKey: nature, initialProgress, freeExp, boostKind: "none", boostCount: 0 });
-    const finalNormalCandy = Math.max(0, resNormal.candies - ownedCandy);
+    const missingNormal = Math.max(0, resNormal.candies - ownedCandy);
+
+    // ★ヘルパー: 所持数・不足分の行を作る関数
+    const makeSubRows = (totalNeed) => {
+      const missing = Math.max(0, totalNeed - ownedCandy);
+      return `
+        <div style="font-size:10px; color:#5d6d7e; text-align:right; margin-top:-4px; margin-bottom:4px;">
+           所持数：${ownedCandy.toLocaleString()}個 / 不足分：<span style="color:${missing > 0 ? '#e74c3c' : '#5d6d7e'}">${missing.toLocaleString()}個</span>
+        </div>
+      `;
+    };
 
     // 2. 通常計算結果の表示
     let html = `
       <div class="lvResRow"><div class="lvResKey">必要経験値</div><div class="lvResVal">${displayExpNeeded.toLocaleString()} pt</div></div>
-      <div class="lvResRow"><div class="lvResKey">必要なアメの数🍬</div><div class="lvResVal">${finalNormalCandy.toLocaleString()} 個</div></div>
+      
+      <div class="lvResRow"><div class="lvResKey">必要なアメの数🍬</div><div class="lvResVal">${resNormal.candies.toLocaleString()} 個</div></div>
+      ${makeSubRows(resNormal.candies)}
+
       <div class="lvResRow" style="align-items: center;">
         <div class="lvResKey">
           <span>必要なゆめのかけら量✨</span>
@@ -240,14 +257,13 @@ function toNum(v) {
 
     if (boostKind !== "none") {
       const resBoost = simulate({ lvNow, lvTarget, typeKey: type, natureKey: nature, initialProgress, freeExp, boostKind, boostCount: bCount });
-      const finalBoostCandy = Math.max(0, resBoost.candies - ownedCandy);
       const diffShard = resBoost.shards - resNormal.shards;
 
       let boostHeader = "";
       const boostRateInfo = boostKind === "mini" ? "(EXP2倍/かけら4倍)" : "(EXP2倍/かけら5倍)";
       
       if (isBoostCountEmpty) {
-        boostHeader = `${boostKind === "mini" ? "ミニアメブースト" : "アメブースト"}最大適用時 ${boostRateInfo}`;
+        boostHeader = `${boostKind === "mini" ? "ミニアメブースト" : "アメブースト"}最大数適用時 ${boostRateInfo}`;
       } else {
         boostHeader = `${boostKind === "mini" ? "ミニアメブースト" : "アメブースト"} ${bCount}個適用時 ${boostRateInfo}`;
       }
@@ -256,8 +272,10 @@ function toNum(v) {
       html += `<div class="lvResSubTitle" style="font-size: 12.5px;">${boostHeader}</div>
                <div class="lvResRow">
                  <div class="lvResKey">必要なアメの数🍬</div>
-                 <div class="lvResVal">${finalBoostCandy.toLocaleString()} 個</div>
+                 <div class="lvResVal">${resBoost.candies.toLocaleString()} 個</div>
                </div>
+               ${makeSubRows(resBoost.candies)}
+               
                <div class="lvResRow" style="align-items: center;">
                  <div class="lvResKey">
                    <span>必要なゆめのかけら量✨</span>
@@ -268,10 +286,52 @@ function toNum(v) {
                  </div>
                </div>`;
     }
+
+  /* ========== 備考欄（機能停止中） ==========
+  // 復活させる場合は、ここのコメントアウトを外す
+
+  // ★追加: 備考欄（マイルストーン計算）
+  const milestones = [25, 30, 50, 55, 60, 65];
+  
+  // 現在のレベル(lvNow)ではなく「目標レベル(lvTarget)」より大きいものだけ抽出
+  const validMilestones = milestones.filter(m => m > lvTarget);
+
+  // ブーストが選択されている場合(boostKind !== "none")のみ表示
+  if (validMilestones.length > 0 && boostKind !== "none") {
+    let detailsHtml = "";
+    validMilestones.forEach(ms => {
+      const msRes = simulate({ 
+        lvNow, lvTarget: ms, typeKey: type, natureKey: nature, initialProgress, freeExp, 
+        boostKind, boostCount: bCount 
+      });
+      const msMissing = Math.max(0, msRes.candies - ownedCandy);
+
+      detailsHtml += `
+        <div style="display:flex; justify-content:space-between; align-items:baseline; border-bottom: 1px dashed #eee; padding: 6px 0;">
+          <div style="font-weight:900; font-size:11px; color:var(--text); white-space:nowrap; margin-right:4px;">Lv.${ms}まで</div>
+          <div style="font-size:10px; text-align:right; color:#5d6d7e; line-height:1.2;">
+            必要数：${msRes.candies.toLocaleString()}　所持数：${ownedCandy.toLocaleString()}　<span style="font-weight:900; color:${msMissing > 0 ? '#e74c3c' : '#5d6d7e'};">不足数：${msMissing.toLocaleString()}</span>
+          </div>
+        </div>`;
+    });
+
+    html += `
+      <div style="margin-top: 16px; padding-top: 8px;">
+        <details style="cursor:pointer;">
+          <summary style="font-size:12px; font-weight:900; color:var(--main); outline:none;">▼備考</summary>
+          <div style="margin-top:8px; padding:0 8px; background:#f8f9fa; border-radius:8px;">
+            ${detailsHtml}
+          </div>
+        </details>
+      </div>
+    `;
+  }
+  ========================================== */
+
     container.innerHTML = html;
   }
 
-window.LevelTab = {
+  window.LevelTab = {
     init() {
       if (!window.__LV_BOUND__) {
         window.__LV_BOUND__ = true;
@@ -317,5 +377,3 @@ window.LevelTab = {
     }
   };
 })();
-
-

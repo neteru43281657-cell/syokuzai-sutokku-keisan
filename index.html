@@ -891,8 +891,9 @@
   #tab3 .lvlDivider { height: 1px; background: var(--line); margin: 4px 0; opacity: 0.6; }
 
   #tab3 .lvlLabel { font-weight: 900; font-size: 14px; color: var(--text); flex: 1; }
-  #tab3 .lvlReq { color: var(--danger); margin-right: 4px; }
+  #tab3 .lvlReq { color: #ff0000; margin-right: 4px; font-weight: 900; font-size: 1.2em; vertical-align: middle; }
 
+  /* 入力欄とクイックボタンの配置 */
   /* 入力欄とクイックボタンの配置 */
   #tab3 .lvlRow { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
   #tab3 .lvlRowTop { align-items: flex-start !important; padding-top: 4px; }
@@ -1139,6 +1140,195 @@
   }  
 
 
+  /* --- Pokedex追加機能用スタイル --- */
+  
+  /* ★修正: 青枠のデザインを対象（島/ポケモン）によって分ける 
+  
+  /* 1. 島（フィールド）選択時の青枠: カード全体を囲む */
+  .field-item.highlight-blue {
+    border: 3px solid #007bff !important;
+    box-sizing: border-box !important;
+    transition: transform 0.1s;
+    transform: scale(1.02); /* 少しだけ大きく */
+    box-shadow: none !important;
+    background-color: transparent !important;
+    z-index: 1;
+  }
+  
+  /* 2. ポケモン一覧時の青枠: 画像にだけ丸い枠をつける */
+  .poke-item.highlight-blue {
+    border: none !important;
+    background: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    border-radius: 0 !important;
+  }
+  
+  /* 画像（img）に対してスタイルを適用 */
+  .poke-item.highlight-blue img {
+    border: 2px solid #007bff; /* シンプルな青線 */
+    border-radius: 50%;        /* 完全な丸 */
+    box-sizing: border-box;
+    padding: 1px;              /* 画像と枠の間にわずかな隙間 */
+    background: #fff;          /* 透過画像の場合、背景を白にして枠を見やすく */
+  }
+  
+  
+  /* 検索バーとアイコンのコンテナ */
+  .dex-tool-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+    background: #fff;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    position: relative; 
+    z-index: 100;
+  }
+  
+  .dex-search-row {
+    display: flex;
+    gap: 8px;
+    position: relative;
+    align-items: center;
+  }
+  
+  .dex-search-input {
+    flex: 1;
+    padding: 8px 12px;
+    padding-right: 32px; 
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+  }
+  .dex-search-input:focus {
+    border-color: var(--main);
+  }
+  
+  .dex-search-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    font-size: 16px;
+    color: #999;
+    background: #eee;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+    z-index: 10;
+  }
+  .dex-search-clear:hover {
+    background: #ccc;
+    color: #fff;
+  }
+  
+  /* 自作サジェストリスト */
+  .dex-suggest-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--main);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 200;
+    margin-top: 4px;
+    display: none; 
+  }
+  .dex-suggest-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text);
+  }
+  .dex-suggest-item:last-child { border-bottom: none; }
+  .dex-suggest-item:hover, .dex-suggest-item:active {
+    background: var(--main-soft);
+    color: var(--main);
+  }
+  
+  /* ブックマークアイコン群 */
+  .dex-icon-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+  }
+  .dex-icon-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 50%; /* 完全な丸 */
+    border: 1px solid transparent;
+    background: #f0f2f5;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .dex-icon-btn.active-filter {
+    background: #007bff;
+    color: #fff;
+    border-color: #0056b3;
+  }
+  
+  /* ポケモン詳細画面内のブックマークアイコン */
+  .detail-bookmark-row {
+    display: flex;
+    gap: 12px;
+    margin-left: auto;
+  }
+  .bm-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%; /* 完全な丸 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #ccc;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    cursor: pointer;
+  }
+  .bm-icon.active {
+    border-color: transparent;
+    color: #fff;
+  }
+  
+  /* 各アイコンの色定義 */
+  .bm-icon[data-id="1"].active, .dex-icon-btn[data-id="1"] { color: #f1c40f; text-shadow: 0 1px 1px rgba(0,0,0,0.2); } /* 星 */
+  .bm-icon[data-id="2"].active, .dex-icon-btn[data-id="2"] { color: #e74c3c; text-shadow: 0 1px 1px rgba(0,0,0,0.2); } /* ハート */
+  .bm-icon[data-id="3"].active, .dex-icon-btn[data-id="3"] { color: #2ecc71; text-shadow: 0 1px 1px rgba(0,0,0,0.2); } /* 四角 */
+  
+  /* フィルタ時の背景色調整 */
+  .dex-icon-btn.active-filter[data-id="1"] { background: #fff9db; border-color: #f1c40f; }
+  .dex-icon-btn.active-filter[data-id="2"] { background: #fadbd8; border-color: #e74c3c; }
+  .dex-icon-btn.active-filter[data-id="3"] { background: #d5f5e3; border-color: #2ecc71; }
+  
+  .dex-note-text {
+    font-size: 9px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 4px;
+  }
+    
+    
 </style>
 </head>
 
@@ -1154,7 +1344,7 @@
     <button id="openDocs"
       style="background:none; border:none; color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px; padding:6px 8px;">
       <span style="font-size:18px; line-height:1;">📖</span>
-      <span style="font-size:12px; font-weight:800;">お役立ち資料集</span>
+      <span style="font-size:12px; font-weight:800;">資料集</span>
     </button>
 
     <button id="openNotice"
@@ -1509,7 +1699,7 @@
   <div class="card" style="max-width:520px; width:100%; position:relative;">
 
     <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:12px;">
-      <div style="font-weight:900;">📖 お役立ち資料集</div>
+      <div style="font-weight:900;">📖 資料集</div>
       <button id="closeDocs"
         style="background:none; border:1px solid var(--line); border-radius:10px; padding:6px 10px; font-weight:800; cursor:pointer;">
         閉じる

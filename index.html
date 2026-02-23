@@ -71,13 +71,21 @@
       accent-color: var(--main);
     }
 
+    /* キーボード表示時の制御 */
+    body.keyboard-open .bottom-nav {
+      display: none !important;
+    }
+    body.keyboard-open main {
+      padding-bottom: 20px;
+    }
+
     header {
       padding: 8px 16px;
       background: var(--main);
       color: #fff;
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 1500;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -134,6 +142,10 @@
     .nav-item.active { color: var(--main); }
     .nav-icon { font-size: 18px; }
 
+    /* タブの文字切り替え用クラス（通常はPC名を表示、SP名は隠す） */
+    .nav-text-exp-pc { display: inline; }
+    .nav-text-exp-sp { display: none; }
+
     .card {
       background: var(--card);
       border: 1px solid var(--line);
@@ -186,7 +198,6 @@
     }
     input.emphSelect { text-align: center; }
 
-    /* ★標準スタイルのプルダウン */
     .stdSelect {
       padding: 4px 8px;
       border: 1px solid var(--line);
@@ -220,7 +231,6 @@
       line-height: 1.2;
     }
     
-    /* --- 条件設定ヘッダー --- */
     .settingsHeaderRow {
       display: flex;
       justify-content: space-between;
@@ -230,7 +240,6 @@
       width: 100%;
     }
 
-    /* 左側カラム：タイトルとバッジ */
     .header-left-col {
       display: flex;
       flex-direction: column;
@@ -252,14 +261,12 @@
       align-self: flex-start;
     }
 
-    /* 右側カラム：追加・クリアボタン */
     .header-right-col {
       display: flex;
       gap: 8px;
       align-items: center;
     }
 
-    /* 操作ボタン */
     #actionBlock > button {
       padding: 0 10px;
       height: 32px;
@@ -271,7 +278,6 @@
       justify-content: center;
     }
 
-    /* --- 設定用グレーボックス --- */
     .settings-grey-box {
       display: flex;
       gap: 10px;
@@ -289,7 +295,6 @@
       min-width: 120px;
     }
 
-    /* SSボタンエリア */
     .ss-area-in-box {
       display: flex;
       flex-direction: column;
@@ -336,30 +341,12 @@
       white-space: nowrap;
     }
 
-    /* スマホ表示時のSSエリア調整 */
-    @media (max-width: 450px) {
-      .ss-area-in-box {
-        width: 100%;
-        margin-left: 0;
-        margin-top: 4px;
-        padding-top: 4px;
-        border-top: 1px dashed #e0e0e0;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .ss-note-tiny {
-        order: -1;
-      }
-    }
-
-    /* --- 計算結果ヘッダー --- */
     .resultHeader {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 12px;
-      gap: 4px;
+      gap: 6px;
     }
     .resultTitle {
       font-size: 16px;
@@ -369,25 +356,36 @@
       white-space: nowrap;
     }
 
-    /* スナップショット作成ボタン */
+    .capsule-btn, .total-badge {
+      height: 28px;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      white-space: nowrap;
+    }
     .capsule-btn {
-      padding: 6px 14px;
-      font-size: 12px;
+      padding: 0 14px;
       font-weight: 900;
-      line-height: 1;
       border-radius: 999px;
       background: #fff;
       color: var(--main);
       border: 1.5px solid var(--main);
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       transition: background 0.2s;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      white-space: nowrap;
     }
     .capsule-btn:active { background: var(--main-soft); transform: scale(0.98); }
+    
+    .total-badge { 
+      background: var(--main); 
+      color: #fff; 
+      border: none; 
+      padding: 0 16px; 
+      border-radius: 999px; 
+      font-weight: 700; 
+    }
 
     .replenishHeaderRow {
       display: flex;
@@ -406,8 +404,9 @@
       display: flex; background: #f3f6fa; border-radius: 8px; padding: 2px; border: 1px solid var(--line);
     }
     .radioGroup label {
-      flex: 1; text-align: center; cursor: pointer; padding: 8px 4px; border-radius: 6px;
-      font-size: 10px; margin: 0; color: var(--muted); font-weight: 700; transition: all 0.2s;
+      flex: 1; text-align: center; cursor: pointer; padding: 8px 2px; border-radius: 6px;
+      font-size: clamp(8px, 2.5vw, 10px); margin: 0; color: var(--muted); font-weight: 700; transition: all 0.2s;
+      white-space: nowrap;
     }
     .radioGroup input { display: none; }
     .radioGroup label:has(input:checked) {
@@ -470,7 +469,6 @@
     .exChk { margin: 0; cursor: pointer; width: 13px; height: 13px; }
     .badge { font-size: 12px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); font-weight: 700; }
     #summaryBadge { background: var(--main-soft); color: var(--main); border: 1px solid #cce5ff; }
-    .total-badge { background: var(--main); color: #fff; border: none; padding: 6px 16px; white-space: nowrap; }
 
     .result-card .resultDivider { height: 1px; background: var(--line); margin: 12px 0; opacity: 0.6; }
     
@@ -512,31 +510,18 @@
     .dex-suggest-item { padding: 10px 12px; border-bottom: 1px solid #eee; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text); }
     .dex-icon-row { display: flex; gap: 16px; justify-content: center; align-items: center; }
     
-    /* --- ★ブックマーク・フィルターボタンの強化 --- */
-    .dex-icon-btn, .bm-icon {
-      transition: transform 0.1s, background 0.2s, border-color 0.2s;
-    }
-    
-    /* 押し込んだ時のアニメーション */
-    .dex-icon-btn:active, .bm-icon:active {
-      transform: scale(0.90);
-    }
+    .dex-icon-btn, .bm-icon { transition: transform 0.1s, background 0.2s, border-color 0.2s; }
+    .dex-icon-btn:active, .bm-icon:active { transform: scale(0.90); }
     
     .dex-icon-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; border-radius: 50%; border: 1px solid transparent; background: #f0f2f5; }
     .dex-icon-btn.active-filter { background: #007bff; color: #fff; border-color: #0056b3; border-width: 3px !important; font-weight: 900; }
     
     .detail-bookmark-row { display: flex; gap: 12px; margin-left: auto; }
     
-    /* 詳細モーダルのBMボタン */
     .bm-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ccc; background: #f8f9fa; border: 1px solid #ddd; cursor: pointer; }
-    
-    .bm-icon.active { 
-      border: 2.5px solid transparent !important; /* ★太さを確保 */
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.1); 
-    }
+    .bm-icon.active { border: 2.5px solid transparent !important; box-shadow: 0 0 0 1px rgba(0,0,0,0.1); }
     
     .bm-icon[data-id="1"].active, .dex-icon-btn[data-id="1"] { color: #f1c40f; } .bm-icon[data-id="2"].active, .dex-icon-btn[data-id="2"] { color: #e74c3c; } .bm-icon[data-id="3"].active, .dex-icon-btn[data-id="3"] { color: #2ecc71; }
-    
     .bm-icon[data-id="1"].active { border-color: #f1c40f; background: #f1c40f; color: #fff; }
     .bm-icon[data-id="2"].active { border-color: #e74c3c; background: #e74c3c; color: #fff; }
     .bm-icon[data-id="3"].active { border-color: #2ecc71; background: #2ecc71; color: #fff; }
@@ -545,7 +530,9 @@
     .dex-icon-btn.active-filter[data-id="2"] { background: #fadbd8; border-color: #e74c3c; color: #e74c3c; }
     .dex-icon-btn.active-filter[data-id="3"] { background: #d5f5e3; border-color: #2ecc71; color: #2ecc71; }
     
+    /* === カレンダー：通常時(3列) === */
     .calendar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+    
     .month-card { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 8px; font-size: 10px; }
     .month-name { font-weight: 900; text-align: center; border-bottom: 1px solid var(--line); margin-bottom: 5px; color: var(--text); }
     .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; align-items: center; justify-items: center; }
@@ -558,26 +545,66 @@
     .day-holiday { color: #ff8c00 !important; font-weight: 900; }
     .day-today::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 16px; height: 16px; border: 1.5px solid #ff4757; border-radius: 4px; background-color: rgba(255, 71, 87, 0.1); pointer-events: none; z-index: 2; }
 
-    @media (max-width: 520px) {
-      .calendar-grid { grid-template-columns: repeat(2, 1fr); }
-      #tab3 .lvlLabel { font-size: 13px; }
-      #tab3 .lvlRight { gap: 6px; }
-      #tab3 .lvlQuickBtn { width: 34px; font-size: 10px; }
-      #tab3 .lvlRadio { font-size: 11px; }
-    }
     @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-    /* tab3 */
+    /* ★★★ EXPシミュレーターの突き抜け・改行防止 ★★★ */
     #tab3 .lvlForm { display: flex; flex-direction: column; gap: 16px; font-family: inherit; }
     #tab3 .lvlGroup { display: flex; flex-direction: column; gap: 14px; }
     #tab3 .lvlDivider { height: 1px; background: var(--line); margin: 4px 0; opacity: 0.6; }
-    #tab3 .lvlLabel { font-weight: 900; font-size: 14px; color: var(--text); flex: 1; }
+    
+    #tab3 .lvlLabel, #tab3 .lvlOptName { 
+      font-weight: 900; 
+      font-size: 14px; 
+      color: var(--text); 
+      flex-shrink: 0;      
+      white-space: nowrap; 
+    }
+    
     #tab3 .lvlReq { color: #ff0000; margin-right: 4px; font-weight: 900; font-size: 1.2em; vertical-align: middle; }
-    #tab3 .lvlRow { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    #tab3 .lvlRow { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: nowrap; }
     #tab3 .lvlRowTop { align-items: flex-start !important; padding-top: 4px; }
-    #tab3 .lvlRight { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-    #tab3 .lvlGrid6 { display: grid !important; grid-template-columns: repeat(6, 1fr) !important; gap: 4px !important; justify-content: flex-end !important; width: 100% !important; max-width: 250px; margin-top: 4px; }
-    #tab3 .lvlQuickBtn { width: auto !important; height: 28px; border-radius: 8px; border: 1px solid var(--line) !important; background: #fff !important; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; color: var(--muted) !important; cursor: pointer; padding: 0; }
+    
+    #tab3 .lvlRight { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: flex-end; 
+      gap: 8px; 
+      flex: 1; 
+      min-width: 0; 
+    }
+    
+    #tab3 .lvlInputWrapper { 
+      display: flex; 
+      align-items: center; 
+      gap: 4px; 
+      justify-content: flex-end; 
+    }
+    
+    /* クイックボタンエリア */
+    #tab3 .lvlQuick { 
+      display: flex; 
+      gap: 4px; 
+      justify-content: flex-end; 
+      width: 100%; 
+      margin-top: 4px; 
+      flex-wrap: wrap; 
+    }
+    #tab3 .lvlQuickBtn { 
+      min-width: 38px;
+      padding: 0 6px;
+      height: 28px; 
+      border-radius: 8px; 
+      border: 1px solid var(--line) !important; 
+      background: #fff !important; 
+      font-size: 10px; 
+      font-weight: 900; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      color: var(--muted) !important; 
+      cursor: pointer; 
+    }
+
     #tab3 input[type="number"] { -moz-appearance: textfield; line-height: normal !important; vertical-align: middle; text-align: center; font-weight: 900; }
     #tab3 input[type="number"]::-webkit-outer-spin-button, #tab3 input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     #tab3 input::placeholder { color: #d1d5db; opacity: 1; font-size: 11px; text-align: center; font-weight: 900; }
@@ -589,16 +616,41 @@
     #tab3 .lvlRadio { font-size: 12px; cursor: pointer; color: var(--text); }
     #tab3 .lvlBoostRow { display: grid; grid-template-columns: 1fr auto; align-items: center; row-gap: 8px; }
     #tab3 .lvlBoostRow .lvlBoostRadios { grid-column: 1 / -1; display: flex; gap: 16px; justify-content: flex-start; padding-left: 4px; }
-    #tab3 .lvlInputWrapper { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
     #tab3 .lvlInMain { width: 50px; }
     #tab3 .lvlInSub { width: 65px; }
     #tab3 .lvlInMini { width: 50px; }
     #tab3 .lvlUnit { font-size: 11px; font-weight: 900; white-space: nowrap; }
-    #tab3 .lvlOptGroup .lvlRow { align-items: flex-start; }
-    #tab3 .lvlOptGroup .lvlLabel { margin-top: 8px; }
-    #tab3 .lvlOptItems { display: flex; flex-direction: column; gap: 10px; flex: 1.5; }
-    #tab3 .lvlOptLine { display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
-    #tab3 .lvlOptName { font-size: 12px; font-weight: 900; color: var(--muted); }
+
+    /* ★修正: オプションレイアウトの右寄せ徹底 */
+    #tab3 .lvlOptGroup .lvlRow { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: stretch; 
+      gap: 12px;
+    }
+    #tab3 .lvlOptGroup .lvlLabel { 
+      margin-top: 0; 
+      text-align: left;
+    }
+    #tab3 .lvlOptItems { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+      align-items: flex-end; /* ★項目全体を右寄せ */
+      width: 100%;           /* ★横幅いっぱいのエリアを確保して、右に寄せる */
+    }
+    #tab3 .lvlOptLine { 
+      display: flex; 
+      justify-content: flex-end; /* ★行内も右端から詰める */
+      align-items: center; 
+      gap: 8px; 
+    }
+    #tab3 .lvlOptName { 
+      white-space: nowrap; 
+      text-align: right; 
+      font-weight: 900; 
+    } 
+
     #tab3 .lvlResult { margin-top: 12px; border: 2px solid var(--main); background: #ffffff; border-radius: 16px; padding: 16px; display: block; position: relative; min-height: 60px; }
     #tab3 .lvResTitle { font-weight: 900; font-size: 16px; color: var(--main); margin-bottom: 12px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
     #tab3 .lvResRow { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
@@ -606,6 +658,7 @@
     #tab3 .lvResVal { font-weight: 900; font-size: 14px; }
     #tab3 .lvResSubTitle { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line); width: 100%; display: block; font-weight: 900; font-size: 13px; color: var(--main); }
     #tab3 .lvResultClose { position: absolute; top: -8px; right: -8px; border: 1px solid var(--line); background: #fff; color: var(--danger); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; z-index: 10; }
+    
     .info-btn-tiny { display: inline-block; color: var(--muted); font-size: 14px; font-weight: 400; cursor: pointer; margin-left: 2px; margin-right: 6px; vertical-align: middle; line-height: 1; opacity: 0.7; transition: opacity 0.2s; }
     .info-btn-tiny:active { opacity: 1.0; transform: scale(0.95); }
     .type-badge { padding: 4px 16px; border-radius: 99px; color: #fff; font-weight: 900; font-size: 12px; display: inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -619,7 +672,69 @@
     .element-type { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: bold; color: #555; }
     .poke-vars-table th, .poke-vars-table td { border-bottom: 1px solid var(--line); }
     .poke-vars-table tr:last-child td { border-bottom: none; }
+
+      /* =========================================================
+       ★★★ スマホ全体の微調整 (450px以下) ★★★
+       ========================================================= */
+    @media (max-width: 450px) {
+      .resultHeader { gap: 4px; }
+      .resultTitle { font-size: 14px; }
+      .capsule-btn, .total-badge { font-size: 10px; padding: 0 8px; }
+      .ss-btn { width: 38px; height: 26px; font-size: 10px; }
+
+      #tab3 .lvlLabel, #tab3 .lvlOptName { 
+        font-size: clamp(10px, 3.2vw, 12px); 
+        letter-spacing: -0.5px; 
+        white-space: nowrap; 
+        line-height: 1.2;
+        flex-shrink: 0; 
+      }
+      
+      #tab3 .lvlRow { gap: 6px; }
+      
+      #tab3 .lvlRight { 
+        flex-shrink: 0; 
+      }
+      
+      #tab3 .lvlQuick { 
+        display: flex !important;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 4px !important;
+      }
+      #tab3 .lvlQuickBtn { 
+        width: auto !important; 
+        min-width: 32px !important; 
+        height: 24px; 
+        font-size: 10px; 
+        padding: 0 4px;
+      }
+      
+      #tab3 .lvlRadios, #tab3 .lvlBoostRadios { gap: 6px !important; flex-wrap: wrap; }
+      #tab3 .lvlRadio { font-size: 10px; }
+      #tab3 .lvlUnit { font-size: clamp(9px, 3vw, 11px); }
+      #tab3 input::placeholder { font-size: 9px; }
+      #tab3 .lvlInMain { width: 40px; }
+      #tab3 .lvlInSub { width: 50px; }
+      #tab3 .lvlInMini { width: 40px; }
+    }
+
+    /* =========================================================
+       ★★★ iPhone SE など極小画面専用の微調整 (380px以下) ★★★
+       ========================================================= */
+    @media (max-width: 380px) {
+      /* ★極小画面のときだけ「経験値シミュ」に切り替え */
+      .nav-text-exp-pc { display: none !important; }
+      .nav-text-exp-sp { display: inline !important; }
+
+      /* ★極小画面のときだけカレンダーを2列化 */
+      .calendar-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 6px !important; }
+      .month-card { padding: 4px !important; font-size: 9px !important; }
+      .days-grid { gap: 1px !important; }
+      .day { font-size: 9px !important; }
+    }
 </style>
+  
 </head>
 
 <body>
@@ -627,19 +742,17 @@
 <header>
   <div>
     <div id="headerTitle" class="title-text">料理計算</div>
-    <div id="headerVer" class="ver-text">ver1.1.2</div>
+    <div id="headerVer" class="ver-text">ver1.1.1</div>
   </div>
 
   <div style="display:flex; align-items:center; gap:10px;">
-    <button id="openTheme" style="background:none; border:none; color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px; padding:6px 8px;">
-      <span style="font-size:18px; line-height:1;">🎨</span>
-      <span style="font-size:12px; font-weight:800;">テーマカラー</span>
+    <button id="openTheme" style="background:none; border:none; color:#fff; cursor:pointer; display:flex; align-items:center; padding:6px;">
+      <span style="font-size:20px; line-height:1;">🎨</span>
     </button>
-    <button id="openDocs" style="background:none; border:none; color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px; padding:6px 8px;">
-      <span style="font-size:18px; line-height:1;">📖</span>
-      <span style="font-size:12px; font-weight:800;">資料集</span>
+    <button id="openDocs" style="background:none; border:none; color:#fff; cursor:pointer; display:flex; align-items:center; padding:6px;">
+      <span style="font-size:20px; line-height:1;">📖</span>
     </button>
-    <button id="openNotice" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer; padding:6px 8px;">ⓘ</button>
+    <button id="openNotice" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer; padding:6px;">ⓘ</button>
   </div>
 </header>
 
@@ -699,11 +812,11 @@
 
         <div class="ss-area-in-box">
           <div id="ssBtnGroup">
-             <button class="ss-btn" data-ssid="1">SS1</button>
-             <button class="ss-btn" data-ssid="2">SS2</button>
-             <button class="ss-btn" data-ssid="3">SS3</button>
+             <button class="ss-btn" data-ssid="1">スロ1</button>
+             <button class="ss-btn" data-ssid="2">スロ2</button>
+             <button class="ss-btn" data-ssid="3">スロ3</button>
           </div>
-          <div class="ss-note-tiny">※長押しでSSを消去</div>
+          <div class="ss-note-tiny">※長押しで消去できます</div>
         </div>
       </div>
 
@@ -730,7 +843,7 @@
       <div class="resultHeader">
         <div class="resultTitle">計算結果</div>
         <button id="createSnapshotBtn" class="capsule-btn">
-          スナップショットを作成
+          結果を保存
         </button>
         <span class="badge total-badge" id="totalBadge">総合計 0個</span>
       </div>
@@ -793,12 +906,12 @@
                   <input id="lvNow" class="lvlInMain" type="number" placeholder="xx" inputmode="numeric">
                   <span class="lvlUnit">レベル</span>
                 </div>
-                <div class="lvlQuick" style="display: flex; gap: 4px; justify-content: flex-end; width: 100%; margin-top: 4px;">
-                  <button type="button" class="lvlQuickBtn" data-now="25" style="flex: 1; min-width: 40px;">25</button>
-                  <button type="button" class="lvlQuickBtn" data-now="30" style="flex: 1; min-width: 40px;">30</button>
-                  <button type="button" class="lvlQuickBtn" data-now="50" style="flex: 1; min-width: 40px;">50</button>
-                  <button type="button" class="lvlQuickBtn" data-now="55" style="flex: 1; min-width: 40px;">55</button>
-                  <button type="button" class="lvlQuickBtn" data-now="60" style="flex: 1; min-width: 40px;">60</button>
+                <div class="lvlQuick">
+                  <button type="button" class="lvlQuickBtn" data-now="25">25</button>
+                  <button type="button" class="lvlQuickBtn" data-now="30">30</button>
+                  <button type="button" class="lvlQuickBtn" data-now="50">50</button>
+                  <button type="button" class="lvlQuickBtn" data-now="55">55</button>
+                  <button type="button" class="lvlQuickBtn" data-now="60">60</button>
                 </div>
               </div>
             </div>
@@ -810,13 +923,13 @@
                   <input id="lvTarget" class="lvlInMain" type="number" placeholder="xx" inputmode="numeric">
                   <span class="lvlUnit">レベル</span>
                 </div>
-                <div class="lvlQuick" style="display: flex; gap: 4px; justify-content: flex-end; width: 100%; margin-top: 4px;">
-                  <button type="button" class="lvlQuickBtn" data-target="25" style="flex: 1; min-width: 40px;">25</button>
-                  <button type="button" class="lvlQuickBtn" data-target="30" style="flex: 1; min-width: 40px;">30</button>
-                  <button type="button" class="lvlQuickBtn" data-target="50" style="flex: 1; min-width: 40px;">50</button>
-                  <button type="button" class="lvlQuickBtn" data-target="55" style="flex: 1; min-width: 40px;">55</button>
-                  <button type="button" class="lvlQuickBtn" data-target="60" style="flex: 1; min-width: 40px;">60</button>
-                  <button type="button" class="lvlQuickBtn" data-target="65" style="flex: 1; min-width: 40px;">65</button>
+                <div class="lvlQuick">
+                  <button type="button" class="lvlQuickBtn" data-target="25">25</button>
+                  <button type="button" class="lvlQuickBtn" data-target="30">30</button>
+                  <button type="button" class="lvlQuickBtn" data-target="50">50</button>
+                  <button type="button" class="lvlQuickBtn" data-target="55">55</button>
+                  <button type="button" class="lvlQuickBtn" data-target="60">60</button>
+                  <button type="button" class="lvlQuickBtn" data-target="65">65</button>
                 </div>
               </div>
             </div>
@@ -894,25 +1007,20 @@
                     <span class="lvlUnit">体</span>
                   </div>
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 2px; align-items: flex-start; width: fit-content; margin-left: auto;">
-                  <div class="lvlOptLine" style="width: 100%; margin: 0; padding: 0;">
-                    <span class="lvlOptName">せいちょうのおこう</span>
-                    <span class="info-btn-tiny" onclick="showInfo('最高効率で自動配分されます')">ⓘ</span>
-                    <div class="lvlInputWrapper">
-                      <input id="lvGrowthIncense" class="lvlInMini" type="number" placeholder="xxx">
-                      <span class="lvlUnit">個</span>
-                    </div>
+                <div class="lvlOptLine">
+                  <span class="lvlOptName">せいちょうのおこう</span>
+                  <span class="info-btn-tiny" onclick="showInfo('最高効率で自動配分されます')">ⓘ</span>
+                  <div class="lvlInputWrapper">
+                    <input id="lvGrowthIncense" class="lvlInMini" type="number" placeholder="xxx">
+                    <span class="lvlUnit">個</span>
                   </div>
                 </div>
-                
-                <div style="display: flex; flex-direction: column; gap: 2px; align-items: flex-start; width: fit-content; margin-left: auto; margin-top: 4px;">
-                  <div class="lvlOptLine" style="width: 100%; margin: 0; padding: 0;">
-                    <span class="lvlOptName">グッドスリープデー</span>
-                    <span class="info-btn-tiny" onclick="showInfo('通しの3日間で1回扱いです')">ⓘ</span>
-                    <div class="lvlInputWrapper">
-                      <input id="lvGSD" class="lvlInMini" type="number" placeholder="xx">
-                      <span class="lvlUnit">回</span>
-                    </div>
+                <div class="lvlOptLine">
+                  <span class="lvlOptName">グッドスリープデー</span>
+                  <span class="info-btn-tiny" onclick="showInfo('通しの3日間で1回扱いです')">ⓘ</span>
+                  <div class="lvlInputWrapper">
+                    <input id="lvGSD" class="lvlInMini" type="number" placeholder="xx">
+                    <span class="lvlUnit">回</span>
                   </div>
                 </div>
               </div>
@@ -971,7 +1079,8 @@
       </div>
       <div class="nav-item" onclick="switchTab('tab3', this)">
         <span class="nav-icon">🔍</span>
-        <span>経験値シミュレータ―</span>
+        <span class="nav-text-exp-pc">経験値シミュレーター</span>
+        <span class="nav-text-exp-sp">経験値シミュ</span>
       </div>
       <div class="nav-item" onclick="switchTab('tab4', this)">
         <span class="nav-icon">🌙</span>
@@ -1054,7 +1163,6 @@
       </div>
       <div style="font-weight:900; margin-bottom:6px; margin-top:14px; border-top:1px solid var(--line); padding-top:10px;">更新情報</div>
       <div style="font-size:11px; color:var(--muted); line-height:1.8; max-height:100px; overflow-y:auto;">
-        <div><span style="display:inline-block; width:55px;">ver1.1.2</span>料理の新計算方法を追加、資料を追加</div>  
         <div><span style="display:inline-block; width:55px;">ver1.1.1</span>料理のブックマーク機能を追加、UIを微修正</div>    
         <div><span style="display:inline-block; width:55px;">ver1.1.0</span>テーマカラー変更機能を追加、新ポケモンに対応</div>        
         <div><span style="display:inline-block; width:55px;">ver1.0.9</span>ポケモンのブックマーク機能を追加、UIを微修正</div>  

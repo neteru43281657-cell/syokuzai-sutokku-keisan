@@ -541,7 +541,7 @@
     .nmd { background-color: #000080; color: #fff; border-radius: 4px; }
     .dow { font-size: 8px; margin-bottom: 1px; }
     .dow:nth-child(6), .day-sat { color: #007bff !important; }
-    .dow:nth-child(7), .day-sun { color: #e74c3c !important; }
+    .dow:nth-child(7), .day-sun { color: #e74c3b !important; }
     .day-holiday { color: #ff8c00 !important; font-weight: 900; }
     .day-today::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 16px; height: 16px; border: 1.5px solid #ff4757; border-radius: 4px; background-color: rgba(255, 71, 87, 0.1); pointer-events: none; z-index: 2; }
 
@@ -765,7 +765,11 @@
     .toast-msg {
       background: rgba(0, 0, 0, 0.8); color: #fff; padding: 10px 20px;
       border-radius: 20px; font-size: 13px; font-weight: 700; text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15); white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+      white-space: normal;      /* ★変更：改行を許可 */
+      width: max-content;       /* ★追加：文字の長さに合わせる */
+      max-width: 90vw;          /* ★追加：最大幅を画面の90%までに制限 */
+      line-height: 1.4;         /* ★追加：改行時の行間を見やすく */
       animation: toastFadeIn 0.2s ease-out forwards, toastFadeOut 0.3s ease-in 2.5s forwards;
     }
     @keyframes toastFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -812,6 +816,171 @@
       /* トースト通知の色反転 */
       .toast-msg { background: rgba(255, 255, 255, 0.9); color: #000; }
     }
+
+    /* =========================================================
+       🌈 ゲーミングモード（修正版） 🌈
+       ========================================================= */
+  
+    /* ① 継ぎ目を完全になくすため、虹色を「2周分」定義する */
+    :root {
+      /* ★ 変更1：to right を to left に変更 */
+      --gaming-gradient: linear-gradient(to left, 
+        #ff0000, #ff7f00, #ffff00, #00ff00, #00ffff, #0000ff, #8b00ff,
+        #ff0000, #ff7f00, #ffff00, #00ff00, #00ffff, #0000ff, #8b00ff,
+        #ff0000);
+    }
+
+    /* 背景が流れるアニメーション（ズレないように100%動かしてループさせる） */
+    @keyframes gamingFlow {
+      /* ★ 変更2：100%から0%へ減らしていくことで、左から右への流れにする */
+      0% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* ② アクセントカラー（チェックボックス・ラジオボタン用）のアニメーション */
+    body.gaming-mode {
+      animation: gamingAccent 2s linear infinite !important;
+    }
+    @keyframes gamingAccent {
+      0% { accent-color: #ff0000; }
+      14% { accent-color: #ff7f00; }
+      28% { accent-color: #ffff00; }
+      42% { accent-color: #00ff00; }
+      57% { accent-color: #00ffff; }
+      71% { accent-color: #0000ff; }
+      85% { accent-color: #8b00ff; }
+      100% { accent-color: #ff0000; }
+    }
+
+    /* ③ 単純な枠線のアニメーション（border-colorを直接変更できるもの） */
+    @keyframes gamingBorder {
+      0% { border-color: #ff0000; }
+      14% { border-color: #ff7f00; }
+      28% { border-color: #ffff00; }
+      42% { border-color: #00ff00; }
+      57% { border-color: #00ffff; }
+      71% { border-color: #0000ff; }
+      85% { border-color: #8b00ff; }
+      100% { border-color: #ff0000; }
+    }
+
+    /* カレンダーの当日の赤枠線（outlineで描画されているため専用処理） */
+    @keyframes gamingOutline {
+      0% { outline-color: #ff0000; }
+      14% { outline-color: #ff7f00; }
+      28% { outline-color: #ffff00; }
+      42% { outline-color: #00ff00; }
+      57% { outline-color: #00ffff; }
+      71% { outline-color: #0000ff; }
+      85% { outline-color: #8b00ff; }
+      100% { outline-color: #ff0000; }
+    }
+    body.gaming-mode .days-grid div[style*="outline"] {
+      animation: gamingOutline 2s linear infinite !important;
+      outline-color: #ff0000 !important;
+    }
+
+    /* ④ 文字色・枠線・背景色がすべて虹色に明滅する要素（テーブルヘッダー、n食/21食、カレンダー〇月など） */
+    @keyframes gamingBorderTextBg {
+      0% { color: #ff0000; border-color: #ff0000; background-color: rgba(255,0,0,0.15); }
+      14% { color: #ff7f00; border-color: #ff7f00; background-color: rgba(255,127,0,0.15); }
+      28% { color: #ffff00; border-color: #ffff00; background-color: rgba(255,255,0,0.15); }
+      42% { color: #00ff00; border-color: #00ff00; background-color: rgba(0,255,0,0.15); }
+      57% { color: #00ffff; border-color: #00ffff; background-color: rgba(0,255,255,0.15); }
+      71% { color: #0000ff; border-color: #0000ff; background-color: rgba(0,0,255,0.15); }
+      85% { color: #8b00ff; border-color: #8b00ff; background-color: rgba(139,0,255,0.15); }
+      100% { color: #ff0000; border-color: #ff0000; background-color: rgba(255,0,0,0.15); }
+    }
+    body.gaming-mode #summaryBadge,
+    body.gaming-mode .month-name,
+    body.gaming-mode .radioGroup label:has(input:checked),
+    body.gaming-mode .preview span,
+    body.gaming-mode .badge,
+    body.gaming-mode .energy-table th,
+    body.gaming-mode .mode3Note {
+      animation: gamingBorderTextBg 2s linear infinite !important;
+    }
+
+    /* ⑤ 面が広い要素（グラデーション背景＋白文字） */
+    body.gaming-mode header,
+    body.gaming-mode button.primary,
+    body.gaming-mode .capsule-btn,
+    body.gaming-mode .total-badge,
+    body.gaming-mode .sleep-badge,
+    body.gaming-mode .ss-btn.active,
+    body.gaming-mode .bm-icon.active,
+    body.gaming-mode .dex-icon-btn.active-filter {
+      background-image: var(--gaming-gradient) !important;
+      background-size: 200% 100% !important;
+      animation: gamingFlow 2s linear infinite !important;
+      color: #fff !important;
+      border-color: transparent !important;
+    }
+
+    /* ⑥ 文字だけがグラデーションになる要素（アスタリスク、計算結果テキスト、インフォモーダル内のリンク等） */
+    body.gaming-mode .nav-item.active,
+    body.gaming-mode .lvResTitle,
+    body.gaming-mode .lvResSubTitle,
+    body.gaming-mode #energyResultVal,
+    body.gaming-mode .resultTitle,
+    body.gaming-mode .lvlReq,
+    body.gaming-mode [style*="color:var(--main)"],
+    body.gaming-mode [style*="color: var(--main)"],
+    body.gaming-mode [style*="color:#e74c3c"],
+    body.gaming-mode [style*="color: #e74c3c"] {
+      background-image: var(--gaming-gradient) !important;
+      background-size: 200% 100% !important;
+      animation: gamingFlow 2s linear infinite !important;
+      color: transparent !important;
+      -webkit-background-clip: text !important;
+      background-clip: text !important;
+    }
+
+    /* ⑦ sectionTitle（文字はグラデーションに流しつつ、左側の枠線も虹色に変化させる同時掛け） */
+    body.gaming-mode .sectionTitle {
+      background-image: var(--gaming-gradient) !important;
+      background-size: 200% 100% !important;
+      color: transparent !important;
+      -webkit-background-clip: text !important;
+      background-clip: text !important;
+      animation: gamingFlow 2s linear infinite, gamingBorder 2s linear infinite !important;
+    }
+
+    /* ⑧ 枠線をグラデーションアニメーションにする要素群（中身は通常のカード背景） */
+    body.gaming-mode .result-card,
+    body.gaming-mode #tab3 .lvlResult,
+    body.gaming-mode .energyResultBox,
+    body.gaming-mode .emphSelect,
+    body.gaming-mode .field-item.highlight-blue,
+    body.gaming-mode .poke-item.highlight-blue img {
+      border-color: transparent !important;
+      /* 背景を2層にし、内側を無地、外側（枠線部分）をグラデーションにするハック */
+      background-image: linear-gradient(var(--card), var(--card)), var(--gaming-gradient) !important;
+      background-origin: padding-box, border-box !important;
+      background-clip: padding-box, border-box !important;
+      background-size: 100% 100%, 200% 100% !important;
+      animation: gamingFlow 2s linear infinite !important;
+    }
+
+    /* タマゴが孵化するときの揺れアニメーション */
+    @keyframes eggShake {
+      0% { transform: rotate(0deg); }
+      20% { transform: rotate(-6deg); }
+      40% { transform: rotate(6deg); }
+      60% { transform: rotate(-4deg); }
+      80% { transform: rotate(4deg); }
+      100% { transform: rotate(0deg); }
+    }
+    
+    .egg-shaking {
+      /* アニメーションを0.4秒間再生 */
+      animation: eggShake 0.4s ease-in-out !important;
+      /* span要素を回転させるためには inline-block にする必要があるため */
+      display: inline-block !important; 
+    }
+  
+    /* 隠しボタンは選択不可にする */
+    #secretGamingBtn { user-select: none; }
   
 </style>
   
@@ -822,7 +991,7 @@
 <header>
   <div>
     <div id="headerTitle" class="title-text">料理計算</div>
-    <div id="headerVer" class="ver-text">ver1.1.3</div>
+    <div id="headerVer" class="ver-text">ver1.1.4</div>
   </div>
 
   <div style="display:flex; align-items:center; gap:10px;">
@@ -1243,6 +1412,7 @@
       </div>
       <div style="font-weight:900; margin-bottom:6px; margin-top:14px; border-top:1px solid var(--line); padding-top:10px;">更新情報</div>
       <div style="font-size:11px; color:var(--muted); line-height:1.8; max-height:100px; overflow-y:auto;">
+        <div><span style="display:inline-block; width:55px;">ver1.1.4</span>？？？</div> 
         <div><span style="display:inline-block; width:55px;">ver1.1.3</span>ポケモンの上方修正に対応、ダークモードに対応</div>           
         <div><span style="display:inline-block; width:55px;">ver1.1.2</span>IOS用のUIを修正</div>         
         <div><span style="display:inline-block; width:55px;">ver1.1.1</span>料理のブックマーク機能を追加、UIを微修正</div>    
@@ -1269,13 +1439,23 @@
     </div>
   </div>
 
-  <div id="themeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center; padding:20px;">
-    <div class="card" style="max-width:360px; width:100%; max-height:85vh; overflow-y:auto; position:relative;">
-      <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:10px; margin-bottom:16px;">
-        <div style="font-weight:900; font-size:14px;">🎨 テーマカラー設定</div>
-        <button id="closeTheme" style="background:none; border:1px solid var(--line); border-radius:10px; padding:6px 10px; font-weight:800; cursor:pointer;">閉じる</button>
+  <div id="themeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; overflow-y:auto;">
+    <div style="padding-top: 25vh; display: flex; flex-direction: column; align-items: center; width: 100%; min-height: 100%;">
+      
+      <div class="card" style="max-width:360px; width:calc(100% - 40px); position:relative; flex-shrink: 0;">
+        <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:10px; margin-bottom:16px;">
+          <div style="font-weight:900; font-size:14px;">🎨 テーマカラー設定</div>
+          <button id="closeTheme" style="background:none; border:1px solid var(--line); border-radius:10px; padding:6px 10px; font-weight:800; cursor:pointer;">閉じる</button>
+        </div>
+        <div id="themeGrid" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px;"></div>
       </div>
-      <div id="themeGrid" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px;"></div>
+      
+      <div style="height: 150vh; width: 100%; flex-shrink: 0;"></div>
+      
+      <div style="text-align: center; padding-bottom: 50px;">
+        <span id="secretGamingBtn" style="font-size: 14px; font-weight: 900; letter-spacing: 2px; cursor: pointer; user-select: none; opacity: 0.15; transition: opacity 0.2s; color: #ffffff;">……おや！？　アプリの　ようすが……！</span>
+      </div>
+      
     </div>
   </div>
     

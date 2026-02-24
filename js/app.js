@@ -789,7 +789,90 @@ window.onload = () => {
   
   initSnapshotFeature();
   initKeyboardObserver();
-};
+
+// ====== ここから追加（隠しゲーミングモード） ======
+  let secretTapCount = 0;
+  let secretTapTimer = null;
+
+  const secretBtn = document.getElementById("secretGamingBtn");
+  const defaultText = "……おや！？　アプリの　ようすが……！";
+  
+  if (secretBtn) {
+    secretBtn.addEventListener("click", () => {
+      secretTapCount++;
+      clearTimeout(secretTapTimer);
+      
+      const remain = 5 - secretTapCount;
+      
+      // テキストの更新（残り回数を表示）
+      if (remain > 0) {
+        secretBtn.innerText = `${defaultText} (あと ${remain})`;
+      }
+
+      // タップするごとに少しずつ文字がはっきり見えるようにする演出
+      secretBtn.style.opacity = Math.min(1, 0.15 + (secretTapCount * 0.2));
+      
+      // ★タマゴの揺れアニメーションを毎回発火させるためのハック
+      secretBtn.classList.remove("egg-shaking");
+      void secretBtn.offsetWidth; // 一度ブラウザに計算（リフロー）させてアニメーションをリセット
+      secretBtn.classList.add("egg-shaking");
+      
+      // 1秒以内に連続タップしないと回数がリセットされる
+      secretTapTimer = setTimeout(() => { 
+        secretTapCount = 0; 
+        secretBtn.style.opacity = 0.15; // 透明度を元に戻す
+        secretBtn.innerText = defaultText; // テキストを元に戻す
+      }, 1000);
+      
+      // 5回連続でタップされたら
+      if (secretTapCount === 5) {
+        // 起動のみ
+        if (!document.body.classList.contains("gaming-mode")) {
+          document.body.classList.add("gaming-mode");
+          document.getElementById("themeModal").style.display = "none";  
+           
+          // PWAのテーマカラー設定用のmetaタグを取得して黒にする
+          let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+          if (!metaThemeColor) {
+            metaThemeColor = document.createElement('meta');
+            metaThemeColor.name = "theme-color";
+            document.head.appendChild(metaThemeColor);
+          }
+          metaThemeColor.content = "#000000";
+
+          window.showInfo("🌈 ゲーミングモード起動 🌈");
+          
+          if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+        }
+        
+        secretTapCount = 0;
+        secretBtn.style.opacity = 0.15;
+        secretBtn.innerText = defaultText; // テキストを元に戻す
+      }
+    });
+  }
+
+  // テーマカラーを変更した時にゲーミングモードを終了する処理
+  const themeGrid = document.getElementById("themeGrid");
+  if (themeGrid) {
+    themeGrid.addEventListener("click", () => {
+      if (document.body.classList.contains("gaming-mode")) {
+        document.body.classList.remove("gaming-mode");
+        
+        setTimeout(() => {
+          const currentBg = getComputedStyle(document.body).getPropertyValue('--main').trim();
+          let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+          if (metaThemeColor && currentBg) {
+            metaThemeColor.content = currentBg;
+          }
+          window.showInfo("ゲーミングモードを終了しました");
+        }, 100);
+      }
+    });
+  }
+  // ====== 追加ここまで ======
+   
+}; // ← window.onload の最後の閉じ括弧
 
 window.switchTab = function (tabId, clickedEl) {
   if (typeof gtag === 'function') {

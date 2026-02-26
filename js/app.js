@@ -664,9 +664,13 @@ function createSnapshot() {
   }
 
   const targetKey = SS_KEYS[targetIndex];
-  localStorage.setItem(targetKey, JSON.stringify(current));
-  
-  showInfo(`スロ${targetIndex + 1} に保存しました`);
+  try {
+    localStorage.setItem(targetKey, JSON.stringify(current));
+    showInfo(`スロ${targetIndex + 1} に保存しました`);
+  } catch (e) {
+    console.warn("Snapshot save failed:", e);
+    showInfo("保存に失敗しました\nストレージの空き容量が不足しています");
+  }
   updateSSButtons();
 }
 
@@ -736,7 +740,7 @@ function initKeyboardObserver() {
 /* =========================================================
    onload / タブ切替
 ========================================================= */
-window.onload = () => {
+window.addEventListener("load", () => {
   resetSWAndCacheOnce();
   registerSW();
   renderGrids();
@@ -784,12 +788,16 @@ window.onload = () => {
   const savedTab = localStorage.getItem("activeTab") || "tab1";
   switchTab(savedTab);
 
-  const dM = el("docsModal"), nM = el("noticeModal"), vM = el("docViewerModal");
+  const dM = el("docsModal"), nM = el("noticeModal"), vM = el("docViewerModal"), pM = el("privacyModal");
   el("openDocs").onclick = () => dM.style.display = "flex";
   el("closeDocs").onclick = () => dM.style.display = "none";
   el("openNotice").onclick = () => nM.style.display = "flex";
   el("closeNotice").onclick = () => nM.style.display = "none";
   el("closeDocViewer").onclick = () => vM.style.display = "none";
+  if (pM) {
+    el("openPrivacy").onclick = () => { nM.style.display = "none"; pM.style.display = "flex"; };
+    el("closePrivacy").onclick = () => pM.style.display = "none";
+  }
   
   initSnapshotFeature();
   initKeyboardObserver();
@@ -878,7 +886,7 @@ window.onload = () => {
   }
   // ====== 追加ここまで ======
    
-}; // ← window.onload の最後の閉じ括弧
+}); // ← addEventListener("load") の最後の閉じ括弧
 
 window.switchTab = function (tabId, clickedEl) {
   if (typeof gtag === 'function') {
